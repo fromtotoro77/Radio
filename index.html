@@ -45,7 +45,7 @@
 
 <body class="bg-brand-dark text-white font-sans selection:bg-brand-primary/30 min-h-screen">
     <main
-        class="flex flex-col min-h-screen app-main-width overflow-hidden bg-brand-dark border-x border-slate-800 pb-20">
+        class="flex flex-col h-screen h-[100dvh] app-main-width overflow-hidden bg-brand-dark border-x border-slate-800 pb-20">
         <!-- TOP SECTION: Now Playing -->
         <section
             class="flex-none p-6 pt-12 pb-10 bg-gradient-to-b from-brand-surface to-brand-dark rounded-b-[3rem] shadow-2xl relative overflow-hidden">
@@ -56,10 +56,10 @@
                 <div class="flex justify-between w-full items-center mb-6">
                     <div class="logo">
                         <span class="text-2xl font-black tracking-tighter text-white">Daddy Radio <small
-                                class="text-[0.6rem] opacity-30 font-normal">v2.0.0</small></span>
+                                class="ml-1 text-[0.75rem] opacity-40 font-bold tracking-widest uppercase">v2.0.0</small></span>
                     </div>
                     <div id="header-clock"
-                        class="text-lg font-mono text-brand-primary opacity-80 uppercase tracking-widest">PM 00:00</div>
+                        class="text-4xl font-mono text-brand-primary opacity-90 uppercase tracking-widest">PM 00:00</div>
                 </div>
 
                 <!-- v1.2.1: Isolated Visualizer Boundary Area (Below Title Row) -->
@@ -665,13 +665,27 @@
         }
 
         window.showPage = (id) => {
-            document.querySelectorAll('.page').forEach(p => p.style.display = 'none');
-            // Home is block, Search is flex (to fill column)
+            const mainWrap = document.querySelector('main');
+            // Hide all pages and remove active class
+            document.querySelectorAll('.page').forEach(p => {
+                p.style.display = 'none';
+                p.classList.remove('active');
+            });
+            
             const targetPage = document.getElementById(`page-${id}`);
             targetPage.style.display = 'flex';
+            targetPage.classList.add('active');
+
+            // Special logic for 'search' page: scroll entire page
+            if (id === 'search') {
+                mainWrap.classList.add('main-scrollable');
+            } else {
+                mainWrap.classList.remove('main-scrollable');
+            }
 
             document.querySelectorAll('.nav-item').forEach(btn => {
-                btn.classList.toggle('active', btn.getAttribute('onclick').includes(id));
+                const isActive = btn.getAttribute('onclick').includes(`'${id}'`);
+                btn.classList.toggle('active', isActive);
             });
         };
 

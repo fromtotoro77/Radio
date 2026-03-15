@@ -26,15 +26,17 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   line-height: 1.5;
-  min-height: 100vh;
+  height: 100vh;
+  height: 100dvh;
   display: flex;
   flex-direction: column;
   align-items: center;
-  overflow-x: hidden;
+  overflow: hidden;
 }
 
 html {
-  overflow-y: scroll; /* Zero-Shift: Always show scrollbar to prevent layout jump */
+  overflow: hidden; /* Prevent body scroll */
+  height: -webkit-fill-available;
 }
 
 .app-main-width {
@@ -62,6 +64,18 @@ html {
   gap: 1rem;
   width: 100%;
   animation: fadeIn 0.4s ease-out;
+}
+
+/* Page-specific scroll adjustments */
+.main-scrollable {
+  height: auto !important;
+  overflow-y: auto !important;
+}
+
+.main-scrollable .page.active {
+  display: block !important;
+  height: auto !important;
+  overflow: visible !important;
 }
 
 .page.active {
