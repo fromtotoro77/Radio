@@ -6,6 +6,9 @@
     <title>Premium K-Radio</title>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#0f172a">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="apple-touch-icon" href="icon-512.png">
     <link rel="stylesheet" href="app.css">
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
@@ -34,12 +37,8 @@
                 <!-- Style 1: Symmetrical Glow Waves (Image 2 inspired) -->
                 <div class="visualizer-glow-layer" style="display: none;"></div>
                 
-                <!-- Style 2: Radial organic pulse (Image 2 inspired) -->
-                <div class="visualizer-pulse-layer" style="display: none;">
-                    <div class="pulse-ring"></div>
-                    <div class="pulse-ring"></div>
-                    <div class="pulse-ring"></div>
-                </div>
+                <!-- Style 2: Circular Organic Ring (Canvas) -->
+                <div class="visualizer-ring-layer" style="display: none;"></div>
 
                 <!-- Style 3: Sharp Dense Spectrum (Image 3 inspired) -->
                 <div class="visualizer-sharp-layer" style="display: none;"></div>
@@ -271,23 +270,69 @@
                         line.style.height = height + '%';
                         line.style.opacity = 0.5 + (val / 255) * 0.5;
                     });
-                } else if (vizMode === 'blob') {
-                    // --- Style 2: Radial Organic Pulse (Image 2) ---
-                    const rings = document.querySelectorAll('.pulse-ring');
-                    const low = getAvg(dataArray, 0, 10);
-                    const mid = getAvg(dataArray, 30, 60);
-                    const high = getAvg(dataArray, 80, 110);
-                    
-                    rings.forEach((ring, i) => {
-                        const intensity = i === 0 ? low : (i === 1 ? mid : (low + high) / 2);
-                        const scale = 0.6 + (intensity / 255) * 1.5;
-                        const rotate = (Date.now() / (20 + i * 10)) % 360;
-                        ring.style.transform = `scale(${scale}) rotate(${rotate}deg)`;
-                        ring.style.opacity = 0.2 + (intensity / 255) * 0.5;
-                        // Morphing effect
-                        const br = 50 + (intensity / 10);
-                        ring.style.borderRadius = `${br}% ${100-br}% ${br}% ${100-br}% / ${100-br}% ${br}% ${100-br}% ${br}%`;
+                } else if (vizMode === 'ring') {
+                    // --- Style 2: Nebula Ring (Volumetric Particle Swarm) ---
+                    if (!ctx) return;
+                    const w = canvas.width;
+                    const h = canvas.height;
+                    const cx = w / 2;
+                    const cy = h / 2;
+                    ctx.clearRect(0, 0, w, h);
+                    ctx.globalCompositeOperation = 'lighter';
+
+                    const time = Date.now();
+                    const layers = [
+                        { h: 190, r: h * 0.23, count: 40, weight: 0.5, speed: 0.0005 }, // Cyan Nebula
+                        { h: 280, r: h * 0.25, count: 35, weight: 0.7, speed: 0.0007 }, // Purple Nebula
+                        { h: 40, r: h * 0.21, count: 25, weight: 0.9, speed: 0.0004 }   // Gold Nebula
+                    ];
+
+                    layers.forEach((l, idx) => {
+                        const segments = 80;
+                        const rotation = time * l.speed;
+                        
+                        for (let n = 0; n < l.count; n++) {
+                            ctx.beginPath();
+                            const opacity = Math.random() * 0.15 + 0.05;
+                            ctx.strokeStyle = `hsla(${l.h + (Math.random()*15-7.5)}, 100%, 70%, ${opacity})`;
+                            ctx.lineWidth = l.weight + Math.random() * 0.5;
+                            
+                            const nOffset = n * Math.PI / 10;
+                            
+                            for (let i = 0; i <= segments; i++) {
+                                const angle = (i / segments) * Math.PI * 2;
+                                const freqIdx = Math.floor(Math.abs(Math.sin(angle + nOffset)) * (dataArray.length / 2));
+                                const val = dataArray[freqIdx] / 255.0;
+                                
+                                const wave = Math.sin(angle * 4 + time * 0.005 + nOffset) * 10 + 
+                                             Math.cos(angle * 3 - time * 0.003 + nOffset) * 8;
+                                
+                                const r = l.r + (val * 40) + wave + (Math.sin(n + time * 0.002) * 5);
+                                
+                                const x = cx + Math.cos(angle + rotation) * r;
+                                const y = cy + Math.sin(angle + rotation) * r;
+
+                                if (i === 0) ctx.moveTo(x, y);
+                                else ctx.lineTo(x, y);
+                            }
+                            ctx.stroke();
+                        }
+
+                        // Dense Particle Stardust (Bokeh effect)
+                        for (let p = 0; p < 15; p++) {
+                            const pAngle = Math.random() * Math.PI * 2;
+                            const pDist = l.r + (Math.sin(time * 0.001 + idx) * 15) + (Math.random() - 0.5) * 80;
+                            const px = cx + Math.cos(pAngle + rotation * 0.5) * pDist;
+                            const py = cy + Math.sin(pAngle + rotation * 0.5) * pDist;
+                            const pSize = Math.random() * 2;
+                            
+                            ctx.fillStyle = `hsla(${l.h}, 90%, 80%, ${Math.random() * 0.25})`;
+                            ctx.beginPath();
+                            ctx.arc(px, py, pSize, 0, Math.PI * 2);
+                            ctx.fill();
+                        }
                     });
+                    ctx.globalCompositeOperation = 'source-over';
                 } else if (vizMode === 'cyber') {
                     // --- Style 4: Cyber multi-layer Wave (Reference Image) ---
                     if (!ctx) return;
@@ -408,8 +453,8 @@
         }
 
         function cycleVisualizerMode() {
-            if (vizMode === 'waves') vizMode = 'blob';
-            else if (vizMode === 'blob') vizMode = 'spectrum';
+            if (vizMode === 'waves') vizMode = 'ring';
+            else if (vizMode === 'ring') vizMode = 'spectrum';
             else if (vizMode === 'spectrum') vizMode = 'cyber';
             else if (vizMode === 'cyber') vizMode = 'off';
             else vizMode = 'waves';
@@ -424,12 +469,11 @@
             const cvsLayer = document.getElementById('viz-canvas');
             
             glow.style.display = vizMode === 'waves' ? 'flex' : 'none';
-            pulse.style.display = vizMode === 'blob' ? 'flex' : 'none';
             sharp.style.display = vizMode === 'spectrum' ? 'flex' : 'none';
-            cvsLayer.style.display = vizMode === 'cyber' ? 'block' : 'none';
+            cvsLayer.style.display = (vizMode === 'cyber' || vizMode === 'ring') ? 'block' : 'none';
             container.style.opacity = vizMode === 'off' ? '0' : '1';
 
-            if (vizMode === 'cyber') {
+            if (vizMode === 'cyber' || vizMode === 'ring') {
                 setTimeout(resizeCanvas, 10);
             }
         }
