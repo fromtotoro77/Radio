@@ -59,7 +59,8 @@
                                 class="ml-1 text-[0.75rem] opacity-40 font-bold tracking-widest uppercase">v2.0.0</small></span>
                     </div>
                     <div id="header-clock"
-                        class="text-4xl font-mono text-brand-primary opacity-90 uppercase tracking-widest">PM 00:00</div>
+                        class="text-4xl font-mono text-brand-primary opacity-90 uppercase tracking-widest">PM 00:00
+                    </div>
                 </div>
 
                 <!-- v1.2.1: Isolated Visualizer Boundary Area (Below Title Row) -->
@@ -149,38 +150,40 @@
     <audio id="radio-audio"></audio>
 
     <script>
-        const audio = document.getElementById('radio-audio');
-        const playBtn = document.getElementById('play-btn');
+        // --- 전역 설정 및 상태 변수 ---
+        const audio = document.getElementById('radio-audio'); // 오디오 엘리먼트
+        const playBtn = document.getElementById('play-btn');  // 재생 버튼
         const playIcon = document.getElementById('play-icon');
         const pauseIcon = document.getElementById('pause-icon');
-        const freqDisplay = document.getElementById('current-freq');
-        const nameDisplay = document.getElementById('current-name');
-        const stationList = document.getElementById('station-list');
-        const syncBtn = document.getElementById('sync-btn');
-        const searchViewResults = document.getElementById('search-view-results');
+        const freqDisplay = document.getElementById('current-freq'); // 주파수 표시 영역
+        const nameDisplay = document.getElementById('current-name'); // 방송명 표시 영역
+        const stationList = document.getElementById('station-list'); // 즐겨찾기 목록 컨테이너
+        const syncBtn = document.getElementById('sync-btn');         // 동기화 버튼
+        const searchViewResults = document.getElementById('search-view-results'); // 검색 결과 컨테이너
         const visualizerArea = document.getElementById('visualizer');
 
-        let currentHls = null;
-        let activeStationId = null;
-        let isPlaying = false;
-        let userStations = [];
-        let vizMode = 'waves';
+        let currentHls = null;      // 현재 HLS.js 인스턴스
+        let activeStationId = null; // 현재 활성화된(듣고 있는) 방송 ID
+        let isPlaying = false;      // 재생 상태 플래그
+        let userStations = [];      // 사용자 즐겨찾기 방송 목록
+        let vizMode = 'waves';      // 현재 시각화 모드
 
-        // Web Audio API Variables
-        let audioCtx = null;
-        let analyser = null;
-        let source = null;
-        let dataArray = null;
-        let animationId = null;
-        let wakeLock = null;
-        let canvas = null;
-        let ctx = null;
-        let glowLines = [];
-        let sharpLines = [];
-        let smoothedData = null;
-        let eqCaps = new Array(64).fill(0);
-        let eqCapVelocity = new Array(64).fill(0);
+        // Web Audio API 관련 변수
+        let audioCtx = null;        // 오디오 컨텍스트
+        let analyser = null;        // 오디오 분석기
+        let source = null;          // 오디오 소스
+        let dataArray = null;       // 실시간 주파수 데이터 배열
+        let animationId = null;     // 애니메이션 프레임 ID
+        let wakeLock = null;        // (사용되지 않음) 화면 꺼짐 방지 WakeLock API
+        let canvas = null;          // 시각화용 캔버스
+        let ctx = null;             // 캔버스 2D 컨텍스트
+        let glowLines = [];         // 파동 모드용 글로우 라인 엘리먼트들
+        let sharpLines = [];        // (구) 스펙트럼용 라인 엘리먼트들
+        let smoothedData = null;    // 부드러운 시각화를 위한 보정 데이터 배열
+        let eqCaps = new Array(64).fill(0);       // 모노 모드용 피크 캡 위치
+        let eqCapVelocity = new Array(64).fill(0); // 피크 캡 낙하 속도
 
+        // 기본 제공 방송 목록
         const DEFAULT_STATIONS = [
             { id: 'kbs_classic', name: 'KBS 1FM (클래식)', freq: '93.1MHz', url: 'https://radio.bsod.kr/stream/?stn=kbs&ch=1fm', color: '#005bac' },
             { id: 'kbs_cool', name: 'KBS 2FM (쿨FM)', freq: '89.1MHz', url: 'https://radio.bsod.kr/stream/?stn=kbs&ch=2fm', color: '#e30613' },
@@ -188,6 +191,7 @@
             { id: 'sbs_power', name: 'SBS 파워FM', freq: '107.7MHz', url: 'https://radio.bsod.kr/stream/?stn=sbs&ch=powerfm', color: '#00a0e9' }
         ];
 
+        // 검증된 한국 방송 목록 (검색용)
         const VERIFIED_KR_STATIONS = [
             { name: "KBS 1라디오", stn: "kbs", ch: "1radio", tags: "뉴스, 시사", freq: "97.3MHz" },
             { name: "KBS 2라디오", stn: "kbs", ch: "2radio", tags: "음악, 토크", freq: "106.1MHz" },
@@ -210,20 +214,22 @@
             { name: "CBS 음악FM", stn: "cbs", ch: "mfm", tags: "음악, 팝, 가요", freq: "93.9MHz" }
         ];
 
+        // 앱 초기 실행 함수
         function init() {
-            try { loadStations(); } catch (e) { console.error(e); }
-            try { setupEventListeners(); } catch (e) { console.error(e); }
-            try { initVisualizer(); } catch (e) { console.error(e); }
-            try { updateVisualizerMode(); } catch (e) { console.error(e); }
-            try { updateClock(); } catch (e) { console.error(e); }
+            try { loadStations(); } catch (e) { console.error(e); }      // 저장된 즐겨찾기 로드
+            try { setupEventListeners(); } catch (e) { console.error(e); } // 이벤트 리스너 설정
+            try { initVisualizer(); } catch (e) { console.error(e); }      // 시각화 엔진 초기화
+            try { updateVisualizerMode(); } catch (e) { console.error(e); } // 초기 시각화 모드 적용
+            try { updateClock(); } catch (e) { console.error(e); }        // 시계 시작
             setInterval(() => {
                 try { updateClock(); } catch (e) { }
             }, 1000);
 
-            // Initialize smoothed data
-            smoothedData = new Float32Array(128); // Based on expected fftSize
+            // 데이터 스무딩 배열 초기화 (부드러운 시각화용)
+            smoothedData = new Float32Array(128);
         }
 
+        // 디지털 시계 업데이트
         function updateClock() {
             const now = new Date();
             let hours = now.getHours();
@@ -236,12 +242,14 @@
             if (clockEl) clockEl.innerHTML = timeHTML;
         }
 
+        // 캔버스 크기 조정 (기기 픽셀 밀도 대응)
         function resizeCanvas() {
             if (!canvas) return;
             canvas.width = canvas.offsetWidth * window.devicePixelRatio;
             canvas.height = canvas.offsetHeight * window.devicePixelRatio;
         }
 
+        // 시각화 요소들(DOM/Canvas) 준비
         function initVisualizer() {
             const glowLayer = document.querySelector('.visualizer-glow-layer');
             const sharpLayer = document.querySelector('.visualizer-sharp-layer');
@@ -251,25 +259,28 @@
             window.addEventListener('resize', resizeCanvas);
             resizeCanvas();
 
+            // 파동(Waves) 모드용 엘리먼트 생성
             glowLayer.innerHTML = '';
             glowLines = [];
-            for (let i = 0; i < 40; i++) { // Increased to fill width
+            for (let i = 0; i < 40; i++) {
                 const line = document.createElement('div');
                 line.className = 'glow-line';
                 glowLayer.appendChild(line);
                 glowLines.push(line);
             }
 
+            // (구) 스펙트럼 모드용 엘리먼트 생성 (현재는 사용 안 함)
             sharpLayer.innerHTML = '';
             sharpLines = [];
-            for (let i = 0; i < 50; i++) { // Increased to fill width
-                const line = document.createElement('div');
-                line.className = 'sharp-line';
-                sharpLayer.appendChild(line);
-                sharpLines.push(line);
-            }
+            // for (let i = 0; i < 50; i++) {
+            //     const line = document.createElement('div');
+            //     line.className = 'sharp-line';
+            //     sharpLayer.appendChild(line);
+            //     sharpLines.push(line);
+            // }
         }
 
+        // 오디오 컨텍스트 및 분석기 초기화
         function initAudioContext() {
             if (audioCtx) return;
             try {
@@ -281,19 +292,18 @@
                 analyser.connect(audioCtx.destination);
                 analyser.fftSize = 256;
                 dataArray = new Uint8Array(analyser.frequencyBinCount);
-            } catch (e) {
-                console.error("Web Audio API Error:", e);
-            }
+            } catch (e) { console.error("Web Audio API Error:", e); }
         }
 
+        // --- 시각화 메인 렌더링 루프 ---
         function renderFrame() {
             animationId = requestAnimationFrame(renderFrame);
             if (!isPlaying || vizMode === 'off') return;
 
             if (analyser) {
                 analyser.getByteFrequencyData(dataArray);
-                
-                // Apply global temporal smoothing
+
+                // 전역 시간적 스무딩 적용 (움직임을 부드럽게)
                 if (!smoothedData || smoothedData.length !== dataArray.length) {
                     smoothedData = new Float32Array(dataArray.length);
                 }
@@ -301,80 +311,53 @@
                     smoothedData[i] += (dataArray[i] - smoothedData[i]) * 0.12;
                 }
             }
+
+            // 모드별 렌더링 선택
             if (vizMode === 'waves') {
-                if (glowLines.length === 0) return;
-                const step = Math.floor(dataArray.length / glowLines.length);
-                glowLines.forEach((line, i) => {
-                    const val = dataArray[i * step] || 0;
-                    const height = Math.max(8, (val / 255) * 85);
-                    line.style.height = height + '%';
-                    line.style.opacity = 0.5 + (val / 255) * 0.5;
-                });
-            } else if (vizMode !== 'off') {
+                drawVisualizerLines(); // 기본 파동 모드
+            } else if (vizMode !== 'off') { // Canvas 기반 시각화 모드
                 if (!ctx) return;
                 const w = canvas.width;
                 const h = canvas.height;
                 const cx = w / 2;
                 const cy = h / 2;
-                ctx.clearRect(0, 0, w, h);
+                ctx.clearRect(0, 0, w, h); // 캔버스 초기화
 
                 if (vizMode === 'ring') {
+                    // 액체 링(Liquid Ring)
                     const time = Date.now();
                     const bass = (smoothedData[2] / 255);
-                    const layerCount = 6;
-                    
-                    ctx.globalCompositeOperation = 'lighter';
-                    
-                    const pulseGlow = ctx.createRadialGradient(cx, cy, 0, cx, cy, h * 0.4);
-                    pulseGlow.addColorStop(0, `hsla(280, 100%, 50%, ${bass * 0.15})`);
-                    pulseGlow.addColorStop(1, 'transparent');
-                    ctx.fillStyle = pulseGlow;
-                    ctx.fillRect(0, 0, w, h);
+                    const lineCount = 6;
+                    const baseRadius = Math.min(w, h) * 0.25 + (bass * 30);
 
-                    for (let l = 0; l < layerCount; l++) {
-                        const segments = 120;
-                        const layerPhase = l * (Math.PI / 3);
-                        const hue = (280 + l * 20 + time * 0.01) % 360; 
-                        const opacity = 0.3 + (1 - l / layerCount) * 0.5;
-                        
+                    for (let l = 0; l < lineCount; l++) {
+                        const offset = l * (Math.PI / lineCount);
+                        const hue = (time / 50 + l * 30) % 360;
                         ctx.beginPath();
-                        ctx.lineWidth = 1.5 + (1 - l / layerCount) * 4;
-                        ctx.strokeStyle = `hsla(${hue}, 100%, 75%, ${opacity})`;
-                        ctx.shadowBlur = 10 + bass * 25;
-                        ctx.shadowColor = `hsla(${hue}, 100%, 50%, 0.5)`;
-                        
-                        for (let i = 0; i <= segments; i++) {
-                            const angle = (i / segments) * Math.PI * 2;
-                            const freqIdx = Math.floor(Math.abs(Math.sin(angle * 2)) * 30 + l * 5) % smoothedData.length;
-                            const audioVal = (smoothedData[freqIdx] / 255);
-                            
-                            const warp = Math.sin(angle * 4 + time * 0.002 + layerPhase) * 15 +
-                                        Math.sin(angle * 8 - time * 0.003) * 10 +
-                                        Math.sin(angle * 3 + time * 0.001) * 20;
-                                        
-                            const radius = (h * 0.25) + (audioVal * h * 0.15) + (warp * (0.5 + bass));
-                            const x = cx + Math.cos(angle) * radius;
-                            const y = cy + Math.sin(angle) * radius;
-                            
+                        ctx.strokeStyle = `hsla(${hue}, 80%, 60%, ${0.5 - l * 0.05})`;
+                        ctx.lineWidth = 4 + (l * 2);
+
+                        for (let i = 0; i <= 120; i++) {
+                            const angle = (i / 60) * Math.PI;
+                            const freqIdx = Math.floor(i % (smoothedData.length / 2));
+                            const val = (smoothedData[freqIdx] / 255);
+                            const pulse = Math.sin(angle * 4 + time * 0.005 + offset) * (val * 25);
+                            const r = baseRadius + pulse;
+                            const x = cx + Math.cos(angle) * r;
+                            const y = cy + Math.sin(angle) * r;
                             if (i === 0) ctx.moveTo(x, y);
                             else ctx.lineTo(x, y);
                         }
                         ctx.closePath();
                         ctx.stroke();
-                        
-                        if (l % 2 === 0) {
-                            ctx.globalAlpha = 0.05 * opacity;
-                            ctx.fill();
-                            ctx.globalAlpha = 1.0;
-                        }
                     }
-                    ctx.shadowBlur = 0;
-                    ctx.globalCompositeOperation = 'source-over';
                 } else if (vizMode === 'cyber') {
+                    // 사이버 기하학(Cyber Grid)
                     const time = Date.now();
-                    const lineCount = 3;
-                    const baseHue = 210;
                     const bass = (smoothedData[2] / 255);
+                    const baseHue = (time / 100) % 360;
+                    const lineCount = 4;
+                    ctx.shadowBlur = 10 + bass * 20;
 
                     for (let l = 0; l < lineCount; l++) {
                         const layerOffset = l * 0.5;
@@ -401,20 +384,22 @@
                     }
                     ctx.shadowBlur = 0;
                 } else if (vizMode === 'mono') {
+                    // 모노 이퀄라이저(Mono EQ)
                     const step = Math.ceil(w / 64);
                     const bass = (smoothedData[2] / 255);
-                    
+
                     for (let x = 0; x < w; x += step) {
                         const i = Math.floor((x / w) * 64);
                         const val = smoothedData[i] || 0;
                         const barH = (val / 255) * h * 0.75;
                         const hue = (i / 64) * 360 + (bass * 50);
-                        
+
                         ctx.fillStyle = `hsla(${hue}, 100%, 60%, 0.8)`;
-                        ctx.shadowBlur = 10 + (val/255)*15;
+                        ctx.shadowBlur = 10 + (val / 255) * 15;
                         ctx.shadowColor = `hsla(${hue}, 100%, 50%, 0.6)`;
                         ctx.fillRect(x, h - barH, step - 1, barH);
-                        
+
+                        // 피크 캡 낙하 로직
                         if (barH > eqCaps[i]) {
                             eqCaps[i] = barH;
                             eqCapVelocity[i] = 0;
@@ -423,17 +408,18 @@
                             eqCaps[i] -= eqCapVelocity[i];
                             if (eqCaps[i] < 0) eqCaps[i] = 0;
                         }
-                        
+
                         ctx.fillStyle = '#fff';
                         ctx.shadowBlur = 15; ctx.shadowColor = '#fff';
                         ctx.fillRect(x, h - eqCaps[i] - 3, step - 1, 3);
-                        
+
                         ctx.shadowBlur = 0;
                         ctx.fillStyle = `hsla(${hue}, 100%, 60%, 0.2)`;
                         ctx.fillRect(x, h - barH - 12, step - 1, 6);
                     }
                     ctx.shadowBlur = 0;
                 } else if (vizMode === 'fire_wave') {
+                    // 코스믹 웜홀(Cosmic Wave)
                     const time = Date.now();
                     const lineCount = 20;
                     const bass = (smoothedData[2] / 255);
@@ -457,7 +443,7 @@
 
                         for (let i = 0; i <= segments; i++) {
                             const prog = i / segments;
-                            const depthFac = 1 - prog; 
+                            const depthFac = 1 - prog;
                             const freqIdx = Math.floor(z * 40 + i * 0.2) % smoothedData.length;
                             const val = (smoothedData[freqIdx] / 255);
                             const wave = Math.sin(i * 0.15 - time * 0.005 + l * 0.3) * (val * h * 0.45 * depthFac * z);
@@ -470,7 +456,7 @@
                             else ctx.lineTo(finalX, finalY);
                         }
                         ctx.stroke();
-                        
+
                         if (bass > 0.8 && l > lineCount - 5) {
                             ctx.shadowBlur = 15; ctx.shadowColor = '#00f2ff';
                             ctx.stroke();
@@ -482,6 +468,19 @@
             }
         }
 
+        // 기본 파동(Waves) 모드 렌더링
+        function drawVisualizerLines() {
+            if (glowLines.length === 0) return;
+            const step = Math.floor(dataArray.length / glowLines.length);
+            glowLines.forEach((line, i) => {
+                const val = dataArray[i * step] || 0;
+                const height = Math.max(8, (val / 255) * 85);
+                line.style.height = height + '%';
+                line.style.opacity = 0.5 + (val / 255) * 0.5;
+            });
+        }
+
+        // 로컬 스토리지에서 즐겨찾기 불러오기
         function loadStations() {
             const saved = localStorage.getItem('radio_stations');
             userStations = saved ? JSON.parse(saved) : [...DEFAULT_STATIONS];
@@ -489,6 +488,7 @@
             renderSearchList();
         }
 
+        // 즐겨찾기 목록 UI 렌더링
         function renderStations() {
             if (userStations.length === 0) {
                 stationList.innerHTML = `<div class="p-8 text-center opacity-40 text-sm">즐겨찾기한 방송이 없습니다.</div>`;
@@ -510,6 +510,7 @@
             `).join('');
         }
 
+        // 전체 방송 목록(검색 창) UI 렌더링
         function renderSearchList() {
             searchViewResults.innerHTML = VERIFIED_KR_STATIONS.map(s => {
                 const url = `https://radio.bsod.kr/stream/?stn=${s.stn}${s.ch ? '&ch=' + s.ch : ''}`;
@@ -539,15 +540,14 @@
             }).join('');
         }
 
+        // 이벤트 리스너 통합 설정
         function setupEventListeners() {
             playBtn.addEventListener('click', togglePlay);
             syncBtn.addEventListener('click', synchronizeStreams);
 
-            // v1.2.0: Optimized Click Interaction for Top-Section Visualization Toggle
+            // 상단 플레이어 영역 클릭 시 시각화 모드 전환
             window.addEventListener('click', (e) => {
                 const nowPlayingSection = document.querySelector('section');
-
-                // Toggle ONLY if clicked inside Now Playing section but NOT on buttons/cards/interactive elements
                 if (nowPlayingSection && nowPlayingSection.contains(e.target)) {
                     if (!e.target.closest('button') && !e.target.closest('.station-card')) {
                         cycleVisualizerMode();
@@ -556,6 +556,7 @@
             });
         }
 
+        // 시각화 모드 순환 (Waves -> Ring -> Cyber -> Mono -> Cosmic -> Off)
         function cycleVisualizerMode() {
             const modes = ['waves', 'ring', 'cyber', 'mono', 'fire_wave', 'off'];
             const modeNames = {
@@ -571,6 +572,7 @@
             updateVisualizerMode();
         }
 
+        // 선택된 모드에 따라 UI 및 캔버스 설정 업데이트
         function updateVisualizerMode() {
             const glow = document.querySelector('.visualizer-glow-layer');
             const sharp = document.querySelector('.visualizer-sharp-layer');
@@ -578,11 +580,12 @@
 
             glow.style.display = vizMode === 'waves' ? 'flex' : 'none';
             sharp.style.display = 'none'; // Spectrum removed
-            cvsLayer.style.display = (vizMode === 'cyber' || vizMode === 'ring' || vizMode === 'mono' || vizMode === 'fire_wave') ? 'block' : 'none';
+            cvsLayer.style.display = (vizMode !== 'waves' && vizMode !== 'off') ? 'block' : 'none';
 
-            if (vizMode === 'cyber' || vizMode === 'ring' || vizMode === 'mono' || vizMode === 'fire_wave') setTimeout(resizeCanvas, 10);
+            if (vizMode !== 'waves' && vizMode !== 'off') setTimeout(resizeCanvas, 10);
         }
 
+        // 특정 방송국 선택 및 재생 시작
         function selectStation(id) {
             const station = userStations.find(s => s.id === id);
             if (!station) return;
@@ -593,6 +596,7 @@
             loadStream(station.url, station);
         }
 
+        // HLS 스트림 로드 및 재생 준비
         function loadStream(url, station) {
             if (currentHls) currentHls.destroy();
             if (Hls.isSupported()) {
@@ -612,11 +616,13 @@
             }
         }
 
+        // 재생/일시정지 토글
         function togglePlay() {
             if (isPlaying) pauseAudio();
             else playAudio();
         }
 
+        // 오디오 재생 및 분석 시작
         function playAudio() {
             if (!audio.src && !currentHls) return;
             initAudioContext();
@@ -635,6 +641,7 @@
             }).catch(e => console.error(e));
         }
 
+        // 오디오 일시정지
         function pauseAudio() {
             audio.pause();
             isPlaying = false;
@@ -642,6 +649,7 @@
             pauseIcon.style.display = 'none';
         }
 
+        // 방송 목록 동기화 시뮬레이션
         async function synchronizeStreams() {
             if (syncBtn.classList.contains('spinning')) return;
             syncBtn.classList.add('spinning');
@@ -652,6 +660,7 @@
             showToast('✅ 업데이트 완료', 'success');
         }
 
+        // 알림 토스트 메시지 표시
         function showToast(message, type = '') {
             const container = document.getElementById('toast-container');
             const toast = document.createElement('div');
@@ -664,6 +673,7 @@
             }, 2500);
         }
 
+        // 페이지 전환 및 스크롤 정책 적용
         window.showPage = (id) => {
             const mainWrap = document.querySelector('main');
             // Hide all pages and remove active class
@@ -671,12 +681,12 @@
                 p.style.display = 'none';
                 p.classList.remove('active');
             });
-            
+
             const targetPage = document.getElementById(`page-${id}`);
             targetPage.style.display = 'flex';
             targetPage.classList.add('active');
 
-            // Special logic for 'search' page: scroll entire page
+            // '검색' 페이지는 전체 스크롤, '홈'은 플레이어 고정
             if (id === 'search') {
                 mainWrap.classList.add('main-scrollable');
             } else {
@@ -689,6 +699,7 @@
             });
         };
 
+        // 미리듣기 (검색 목록에서 클릭 시)
         window.previewStation = (url, name, freq) => {
             activeStationId = 'preview';
             freqDisplay.textContent = freq ? freq.replace('MHz', '') : '--.-';
@@ -696,6 +707,7 @@
             loadStream(url, { name });
         };
 
+        // 즐겨찾기 추가/삭제 토글
         window.toggleFavorite = (e, sEncoded) => {
             e.stopPropagation();
             const s = JSON.parse(decodeURIComponent(sEncoded));
@@ -707,6 +719,7 @@
             renderSearchList();
         };
 
+        // 즐겨찾기 목록에서 삭제
         window.removeStation = (e, id) => {
             e.stopPropagation();
             userStations = userStations.filter(us => us.id !== id);

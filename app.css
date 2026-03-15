@@ -1,15 +1,13 @@
+/* 디자인 시스템: 색상 및 폰트 변수 정의 */
 :root {
-  --primary-bg: #0f172a;
-  --secondary-bg: #1e293b;
-  --accent-color: #38bdf8;
-  --text-main: #f8fafc;
-  --text-dim: #94a3b8;
-  --card-bg: rgba(30, 41, 59, 0.7);
-  --font-main: 'Pretendard', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  --font-heading: 'Outfit', sans-serif;
+  --primary-bg: #0f172a;        /* 메인 배경색 (다크 슬레이트) */
+  --surface-bg: #1e293b;        /* 카드 및 레이어 배경색 */
+  --brand-primary: #6366f1;     /* 브랜드 메인 포인트 컬러 (인디고) */
+  --brand-accent: #ff748c;      /* 강조/즐겨찾기 컬러 (핑크-레드) */
+  --text-main: #f8fafc;         /* 기본 텍스트 색상 */
+  --text-dim: #94a3b8;          /* 보조/비활성 텍스트 색상 */
+  --font-main: 'Pretendard', 'Inter', -apple-system, sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
-  --glass-border: rgba(255, 255, 255, 0.1);
-  --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
 }
 
 * {
@@ -39,19 +37,20 @@ html {
   height: -webkit-fill-available;
 }
 
+/* 메인 컨테이너 너비 설정 (모바일 100%, 데스크톱 최대 480px) */
 .app-main-width {
-  width: 100% !important;
-  max-width: 480px !important;
-  margin-left: auto !important;
-  margin-right: auto !important;
+  width: 100%;
+  max-width: 480px;
+  margin: 0 auto;
   position: relative;
 }
 
+/* 하단 네비게이션 바 고정 스타일 */
 .bottom-nav-fixed {
-  width: 100% !important;
-  max-width: 480px !important;
-  left: 50% !important;
-  transform: translateX(-50%) !important;
+  width: 100%;
+  max-width: 480px;
+  left: 50%;
+  transform: translateX(-50%);
 }
 
 .pb-nav {
@@ -102,7 +101,7 @@ header {
 }
 
 .logo-text {
-  font-family: var(--font-heading);
+  font-family: var(--font-main);
   font-weight: 800;
   font-size: 1.2rem; /* Reduced size as requested */
   letter-spacing: 0.15em;
@@ -117,7 +116,7 @@ header {
   font-family: var(--font-mono);
   font-size: 2rem; /* Even larger size per user request */
   font-weight: 700;
-  color: var(--accent-color);
+  color: var(--brand-primary);
   letter-spacing: 0.1em;
   opacity: 1;
   padding-left: 1px;
@@ -154,12 +153,12 @@ header {
 .btn-top:hover {
   background: rgba(255, 255, 255, 0.1);
   transform: translateY(-2px);
-  border-color: var(--accent-color);
+  border-color: var(--brand-primary);
 }
 
 .btn-top.spinning svg {
   animation: rotate 1s linear infinite;
-  fill: var(--accent-color);
+  fill: var(--brand-primary);
 }
 
 @keyframes rotate {
@@ -176,14 +175,14 @@ header {
 
 /* Player Section */
 .player-card {
-  background: var(--card-bg);
+  background: var(--surface-bg);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border: 1px solid var(--glass-border);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 16px;
   padding: 2.5rem 2rem;
   margin: 0.25rem 0 0.75rem 0; /* Tightened gap to next section */
-  box-shadow: var(--glass-shadow);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -218,8 +217,8 @@ header {
 
 .btn-card-viz:hover {
   background: rgba(255, 255, 255, 0.1);
-  color: var(--accent-color);
-  border-color: var(--accent-color);
+  color: var(--brand-primary);
+  border-color: var(--brand-primary);
 }
 
 .visualizer-canvas {
@@ -239,7 +238,7 @@ header {
   left: -50%;
   width: 200%;
   height: 200%;
-  background: conic-gradient(from 0deg, transparent, var(--accent-color), transparent 60%);
+  background: conic-gradient(from 0deg, transparent, var(--brand-primary), transparent 60%);
   opacity: 0.05;
   animation: rotate 10s linear infinite;
   pointer-events: none;
@@ -272,14 +271,14 @@ header {
   font-size: 2.8rem;
   letter-spacing: 0.1em;
   font-weight: 800;
-  background: linear-gradient(to right, #fff, var(--accent-color));
+  background: linear-gradient(to right, #fff, var(--brand-primary));
   background-clip: text;
   -webkit-background-clip: text;
 }
 
 .current-name {
   font-size: 1.1rem;
-  color: var(--text-secondary);
+  color: var(--text-dim);
   margin-top: 0.5rem;
 }
 
@@ -295,7 +294,7 @@ header {
   width: 4.5rem;
   height: 4.5rem;
   border-radius: 50%;
-  background: var(--accent-color);
+  background: var(--brand-primary);
   border: none;
   cursor: pointer;
   display: flex;
@@ -334,7 +333,7 @@ header {
 .section-header h2 {
   font-size: 0.9rem;
   font-weight: 700;
-  color: var(--text-secondary);
+  color: var(--text-dim);
   letter-spacing: 0.1em;
 }
 
@@ -342,18 +341,18 @@ header {
   grid-column: span 2;
   text-align: center;
   padding: 3rem 1rem;
-  color: var(--text-secondary);
+  color: var(--text-dim);
   font-size: 0.9rem;
   line-height: 1.6;
-  border: 1px dashed var(--glass-border);
+  border: 1px dashed rgba(255, 255, 255, 0.1);
   border-radius: 1.5rem;
   background: rgba(255, 255, 255, 0.02);
 }
 
 /* Unified Station Card Style */
 .station-card {
-  background: var(--card-bg);
-  border: 1px solid var(--glass-border);
+  background: var(--surface-bg);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 1rem;
   padding: 1rem;
   display: flex;
@@ -375,20 +374,22 @@ header {
   background: rgba(99, 102, 241, 0.1);
 }
 
+/* 방송사 라벨 뱃지 스타일 */
 .station-badge {
-  width: 3.2rem;
-  height: 3.2rem;
-  flex: none;
-  background: rgba(15, 23, 42, 0.6);
-  border-radius: 0.75rem;
+  flex-shrink: 0;
+  width: 3.5rem;
+  height: 3.5rem;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 1rem;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.9rem; /* v1.1.7: +2pt approx */
-  font-weight: 800;
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
   color: var(--brand-primary);
-  line-height: 1;
-  text-align: center;
+  font-weight: 700;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .station-info {
@@ -396,15 +397,6 @@ header {
   flex-direction: column;
   align-items: flex-start;
   gap: 0.25rem;
-}
-:root {
-    --brand-primary: #6366f1;
-    --brand-accent: #f43f5e;
-    --brand-dark: #0f172a;
-    --brand-surface: #1e293b;
-    --radio-bg: #f8fafc;
-    --radio-surface: #ffffff;
-    --radio-text-muted: #64748b;
 }
 
 /* Custom Animations from Stitch */
