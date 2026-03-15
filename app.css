@@ -38,7 +38,7 @@ html {
 }
 
 .app-main-width {
-  width: 480px !important;
+  width: 100% !important;
   max-width: 480px !important;
   margin-left: auto !important;
   margin-right: auto !important;
@@ -46,10 +46,10 @@ html {
 }
 
 .bottom-nav-fixed {
-  width: 480px !important;
+  width: 100% !important;
+  max-width: 480px !important;
   left: 50% !important;
   transform: translateX(-50%) !important;
-  max-width: 480px !important;
 }
 
 .pb-nav {
