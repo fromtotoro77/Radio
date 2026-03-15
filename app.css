@@ -33,18 +33,23 @@ body {
   overflow-x: hidden;
 }
 
-.container {
-  width: 100%;
-  max-width: 480px;
-  background: var(--bg-color);
-  min-height: 100vh;
-  padding: 2rem 1.5rem;
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  box-shadow: 0 0 100px rgba(0, 0, 0, 0.5);
+html {
+  overflow-y: scroll; /* Zero-Shift: Always show scrollbar to prevent layout jump */
+}
+
+.app-main-width {
+  width: 480px !important;
+  max-width: 480px !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
   position: relative;
-  overflow-x: hidden;
+}
+
+.bottom-nav-fixed {
+  width: 480px !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  max-width: 480px !important;
 }
 
 .pb-nav {
@@ -331,59 +336,45 @@ header {
   background: rgba(255, 255, 255, 0.02);
 }
 
-.station-item {
+/* Unified Station Card Style */
+.station-card {
   background: var(--card-bg);
   border: 1px solid var(--glass-border);
-  border-radius: 10px;
-  padding: 1.25rem;
-  cursor: pointer;
-  transition: all 0.2s ease;
+  border-radius: 1rem;
+  padding: 1rem;
   display: flex;
-  flex-direction: row; /* Main axis row to separate info and delete button */
   align-items: center;
-  justify-content: flex-start;
   gap: 1rem;
-  position: relative;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  width: 100%;
+  box-sizing: border-box;
 }
 
-.btn-delete {
-  position: absolute;
-  top: 0.5rem;
-  right: 0.5rem;
-  width: 2rem;
-  height: 2rem;
-  border-radius: 50%;
-  border: none;
-  background: transparent;
+.station-card:hover {
+  background: rgba(255, 255, 255, 0.05);
+  transform: translateY(-2px);
+}
+
+.station-card.active {
+  border-color: var(--brand-primary);
+  background: rgba(99, 102, 241, 0.1);
+}
+
+.station-badge {
+  width: 3.2rem;
+  height: 3.2rem;
+  flex: none;
+  background: rgba(15, 23, 42, 0.6);
+  border-radius: 0.75rem;
   display: flex;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.btn-delete svg {
-  width: 1rem;
-  height: 1rem;
-  fill: #ef4444;
-  stroke: #ef4444;
-  stroke-width: 2px;
-  filter: drop-shadow(0 0 5px rgba(239, 68, 68, 0.3));
-}
-
-.btn-delete:hover {
-  background: rgba(239, 68, 68, 0.1);
-  transform: scale(1.1);
-}
-
-.station-item.active {
-  border-color: var(--accent-color);
-  background: rgba(56, 189, 248, 0.1);
-}
-
-.station-item:hover {
-  transform: translateY(-4px);
-  background: rgba(255, 255, 255, 0.05);
+  font-size: 0.9rem; /* v1.1.7: +2pt approx */
+  font-weight: 800;
+  color: var(--brand-primary);
+  line-height: 1;
+  text-align: center;
 }
 
 .station-info {
@@ -391,38 +382,75 @@ header {
   flex-direction: column;
   align-items: flex-start;
   gap: 0.25rem;
-  text-align: left;
+}
+:root {
+    --brand-primary: #6366f1;
+    --brand-accent: #f43f5e;
+    --brand-dark: #0f172a;
+    --brand-surface: #1e293b;
+    --radio-bg: #f8fafc;
+    --radio-surface: #ffffff;
+    --radio-text-muted: #64748b;
 }
 
-/* Toast Notification System */
+/* Custom Animations from Stitch */
+@keyframes wave {
+    0%, 100% { height: 10px; }
+    50% { height: 40px; }
+}
+
+.wave-bar-animation {
+    animation: wave 1s ease-in-out infinite;
+}
+
+/* Base Styles */
+body {
+    -webkit-tap-highlight-color: transparent;
+    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background-color: var(--brand-dark);
+}
+
+.no-scrollbar::-webkit-scrollbar {
+    display: none;
+}
+
+.no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+/* Page Transitions */
+.page {
+    display: none;
+}
+
+.page.active {
+    display: block;
+}
+
+/* Toast Styles */
 .toast-container {
-  position: fixed;
-  top: 2rem;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 10000;
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  pointer-events: none;
+    position: fixed;
+    bottom: 100px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1000;
+    width: 90%;
+    max-width: 400px;
 }
 
 .toast {
-  background: rgba(30, 41, 59, 0.9);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  color: #fff;
-  padding: 0.875rem 1.5rem;
-  border-radius: 100px;
-  font-size: 0.9rem;
-  font-weight: 600;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  animation: toast-in 0.4s cubic-bezier(0.18, 0.89, 0.32, 1.28) forwards;
-  white-space: nowrap;
+    background: rgba(30, 41, 59, 0.9);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: white;
+    padding: 12px 24px;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 600;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+    pointer-events: none;
+    animation: toast-in 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
 }
 
 .toast.success {
@@ -604,9 +632,9 @@ header {
 }
 
 .btn-fav-toggle.active svg {
-  fill: #fb7185;
-  stroke: #fb7185;
-  filter: drop-shadow(0 0 8px rgba(251, 113, 133, 0.6));
+  fill: var(--brand-accent);
+  stroke: var(--brand-accent);
+  filter: drop-shadow(0 0 6px var(--brand-accent));
 }
 
 /* Modal */
@@ -767,8 +795,14 @@ header {
 }
 
 .nav-item span {
-  font-size: 0.7rem;
-  font-weight: 600;
+  display: none; /* Remove English text as requested */
+}
+
+.nav-item svg {
+  width: 2rem !important; /* Larger icons */
+  height: 2rem !important;
+  fill: currentColor;
+  transition: transform 0.3s ease;
 }
 
 .nav-item.active {
@@ -851,20 +885,31 @@ header {
     opacity: 0.6;
 }
 
+/* v1.2.2: Universal Visualizer Container (Centrally aligned for flexibility) */
 .visualizer-container {
     position: absolute;
-    bottom: 0;
-    left: 0;
+    inset: 0;
     width: 100%;
     height: 100%;
     z-index: 0;
     pointer-events: none;
     overflow: hidden;
+    display: flex;
+    align-items: center; /* Balanced for Ring/Wave/Cyber */
+    justify-content: center;
+    transition: opacity 0.3s;
+}
+
+/* Ensure main content is solid and positioned correctly */
+main {
+    position: relative;
+    z-index: 10;
+    background-color: var(--brand-dark);
 }
 
 /* --- Reference-Based Premium Visualizers (Extreme Fidelity) --- */
 
-/* Mode 1: Symmetrical Glow Waves (Centrally Aligned & Width Balanced) */
+/* Mode 1: Symmetrical Glow Waves (v1.2.2: Reverted to Center Symmetrical) */
 .visualizer-glow-layer {
     position: absolute;
     top: 50%;
@@ -873,15 +918,15 @@ header {
     width: 100%;
     height: 70%;
     display: flex;
-    align-items: center; /* Inner symmetry */
-    justify-content: space-evenly; /* Spread across width */
-    padding: 0; /* Fully expanded to edges */
+    align-items: center; /* Back to symmetrical center alignment */
+    justify-content: space-evenly;
+    padding: 0;
 }
 
 .glow-line {
     width: 4px;
     background: linear-gradient(to bottom, #00f2ff, var(--accent-color), #00f2ff);
-    border-radius: 20px;
+    border-radius: 20px; /* Full rounded for symmetrical look */
     will-change: height, opacity;
     box-shadow: 0 0 15px var(--accent-color);
     opacity: 0.8;

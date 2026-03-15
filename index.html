@@ -1,113 +1,150 @@
 <!DOCTYPE html>
 <html lang="ko">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Daddy Radio</title>
-    <link rel="manifest" href="manifest.json?v=3">
+    <title>다가치 라디오 v2.0 - 프리미엄 비주얼 에디션</title>
+    <link rel="manifest" href="manifest.json?v=4">
     <meta name="theme-color" content="#0f172a">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="apple-touch-icon" href="icon-512.png">
+
+    <!-- Design System: Tailwind CSS v3 CDN -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            primary: '#6366f1', // Indigo 500
+                            accent: '#ff748c',  // v1.1.7: Pinkish-Red
+                            dark: '#0f172a',    // Slate 900
+                            surface: '#1e293b'  // Slate 800
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Pretendard', 'Inter', 'system-ui', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
     <link rel="stylesheet" href="app.css">
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@700;800&family=Outfit:wght@600;700;900&family=Pretendard:wght@400;600;700&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@700&family=Outfit:wght@700;900&display=swap"
+        rel="stylesheet">
 </head>
-<body>
-    <div class="container pb-nav">
-        <header>
-            <div class="logo">
-                <span class="logo-text">DADDY RADIO <small style="font-size: 0.5rem; opacity: 0.5;">v1.0.4</small></span>
-                <span id="header-clock" class="header-clock">PM 00:00</span>
-            </div>
-            <div class="header-actions">
-                <!-- Sync button moved here previously, visualization button moved out -->
-            </div>
-        </header>
 
-        <!-- Persistent Player Card -->
-        <section class="player-card">
-            <button id="viz-toggle-btn" class="btn-card-viz" title="시각화 스타일 변경">
-                <svg viewBox="0 0 24 24"><path d="M10 20h4V4h-4v16zm-6 0h4v-8H4v8zM16 9v11h4V9h-4z"/></svg>
-            </button>
-            <div id="visualizer" class="visualizer-container">
-                <!-- Style 1: Symmetrical Glow Waves (Image 2 inspired) -->
-                <div class="visualizer-glow-layer" style="display: none;"></div>
-                
-                <!-- Style 2: Circular Organic Ring (Canvas) -->
-                <div class="visualizer-ring-layer" style="display: none;"></div>
+<body class="bg-brand-dark text-white font-sans selection:bg-brand-primary/30 min-h-screen">
+    <main
+        class="flex flex-col min-h-screen app-main-width overflow-hidden bg-brand-dark border-x border-slate-800 pb-20">
+        <!-- TOP SECTION: Now Playing -->
+        <section
+            class="flex-none p-6 pt-12 pb-10 bg-gradient-to-b from-brand-surface to-brand-dark rounded-b-[3rem] shadow-2xl relative overflow-hidden">
+            <!-- Background Glow Decoration -->
+            <div class="absolute -top-20 -right-20 w-64 h-64 bg-brand-primary/20 rounded-full blur-[80px]"></div>
 
-                <!-- Style 3: Sharp Dense Spectrum (Image 3 inspired) -->
-                <div class="visualizer-sharp-layer" style="display: none;"></div>
-
-                <!-- Style 4: Cyber Wave (Canvas) -->
-                <canvas id="viz-canvas" class="visualizer-canvas" style="display: none;"></canvas>
-            </div>
-            <div class="tuner-display">
-                <div class="tuner-header">
-                    <div id="current-freq" class="current-freq">OFF</div>
+            <div class="relative z-10 flex flex-col items-center">
+                <div class="flex justify-between w-full items-center mb-6">
+                    <div class="logo">
+                        <span class="text-2xl font-black tracking-tighter text-white">Daddy Radio <small
+                                class="text-[0.6rem] opacity-30 font-normal">v2.0.0</small></span>
+                    </div>
+                    <div id="header-clock"
+                        class="text-lg font-mono text-brand-primary opacity-80 uppercase tracking-widest">PM 00:00</div>
                 </div>
-                <div id="current-name" class="current-name">채널을 선택하세요</div>
-            </div>
-            
-            
-            <div class="controls">
-                <button id="play-btn" class="btn-play">
-                    <svg viewBox="0 0 24 24" id="play-icon">
-                        <path d="M8 5v14l11-7z"/>
-                    </svg>
-                    <svg viewBox="0 0 24 24" id="pause-icon" style="display: none;">
-                        <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
-                    </svg>
-                </button>
-            </div>
-        </section>
 
-        <!-- Home Page (Favorites ONLY) -->
-        <div id="page-home" class="page active">
-            <section class="favorites-section">
-                <div class="section-header">
-                    <h2>MY FAVORITES</h2>
-                </div>
-                <div id="station-list" class="station-grid">
-                    <!-- Favorites injected here -->
-                </div>
-            </section>
-        </div>
+                <!-- v1.2.1: Isolated Visualizer Boundary Area (Below Title Row) -->
+                <div class="relative w-full flex flex-col items-center py-4 overflow-hidden rounded-2xl min-h-[260px]">
+                    <div id="visualizer" class="visualizer-container">
+                        <div class="visualizer-glow-layer flex items-center justify-center gap-1.5 h-full w-full"></div>
+                        <div class="visualizer-sharp-layer flex justify-center gap-0.5 h-full w-full"
+                            style="display: none;"></div>
+                        <canvas id="viz-canvas" class="visualizer-canvas" style="display: none;"></canvas>
+                    </div>
 
-        <!-- Search Page (All Verified Stations) -->
-        <div id="page-search" class="page">
-            <section class="search-section">
-                <div class="section-header" style="display: flex; justify-content: space-between; align-items: center;">
-                    <h2 style="margin-bottom: 0;">RADIO LIST</h2>
-                    <div style="display: flex; gap: 1rem;">
-                        <button id="sync-btn" class="btn-top" title="방송 리스트 동기화" style="padding: 0; background: none;">
-                            <svg style="width: 1.25rem; height: 1.25rem; fill: var(--accent-color);" viewBox="0 0 24 24"><path d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46C19.54 15.03 20 13.57 20 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74C4.46 8.97 4 10.43 4 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z"/></svg>
+                    <div class="text-center mb-8 relative z-10">
+                        <div id="current-freq" class="text-5xl font-black tracking-tighter text-white bg-clip-text">--.-
+                        </div>
+                        <div id="current-name" class="text-brand-primary font-bold text-sm tracking-wide">채널을 선택하세요
+                        </div>
+                    </div>
+
+                    <!-- Main Play Control -->
+                    <div class="flex items-center gap-8 relative z-10">
+                        <button id="play-btn"
+                            class="w-20 h-20 bg-white/10 backdrop-blur-[2px] border border-white/50 rounded-full flex items-center justify-center shadow-lg shadow-black/10 hover:scale-105 active:scale-95 transition-all">
+                            <svg id="play-icon" class="w-8 h-8 fill-white" viewBox="0 0 24 24">
+                                <path d="M8 5v14l11-7z" />
+                            </svg>
+                            <svg id="pause-icon" class="w-8 h-8 fill-white" style="display: none;" viewBox="0 0 24 24">
+                                <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
+                            </svg>
                         </button>
                     </div>
                 </div>
-                <div id="search-view-results" class="search-results-container">
-                    <!-- All stations list injected here -->
-                </div>
-            </section>
+            </div>
+        </section>
+
+        <!-- PAGE: Home (Favorites) -->
+        <div id="page-home" class="page active flex-grow flex flex-col overflow-hidden px-6 pt-12 pb-8 no-scrollbar">
+            <div class="flex-none flex items-center justify-between mb-4">
+                <h2 class="text-xl font-bold">MY FAVORITES</h2>
+            </div>
+            <div id="station-list" class="flex-grow overflow-y-auto no-scrollbar space-y-4 pt-2 pb-10">
+                <!-- Favorites injected here -->
+            </div>
         </div>
 
-        <!-- Bottom Navigation -->
-        <nav class="bottom-nav">
-            <button class="nav-item active" onclick="window.showPage('home')" title="홈">
-                <svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+        <!-- PAGE: Search (Explorer) -->
+        <div id="page-search" class="page flex-grow flex flex-col overflow-hidden px-6 pt-12 pb-8 no-scrollbar"
+            style="display: none;">
+            <div class="flex-none flex items-center justify-between mb-4">
+                <h2 class="text-xl font-bold">RADIO LIST</h2>
+                <button id="sync-btn"
+                    class="p-2 text-brand-primary hover:bg-brand-primary/10 rounded-full transition-colors" title="동기화">
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                        <path
+                            d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46C19.54 15.03 20 13.57 20 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74C4.46 8.97 4 10.43 4 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z" />
+                    </svg>
+                </button>
+            </div>
+
+            <div id="search-view-results" class="flex-grow overflow-y-auto no-scrollbar space-y-4 pt-2 pb-10">
+                <!-- All stations injected here -->
+            </div>
+        </div>
+
+        <!-- BOTTOM NAV -->
+        <nav
+            class="fixed bottom-0 h-20 bg-brand-surface/95 backdrop-blur-xl border-t border-slate-700/50 flex items-center justify-around px-10 z-50 bottom-nav-fixed">
+            <button class="nav-item active flex flex-col items-center justify-center group"
+                onclick="window.showPage('home')" title="Radio">
+                <svg class="w-8 h-8 text-slate-500 group-[.active]:text-brand-primary transition-colors"
+                    fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" />
+                </svg>
             </button>
-            <button class="nav-item" onclick="window.showPage('search')" title="검색">
-                <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+            <button class="nav-item flex flex-col items-center justify-center group" onclick="window.showPage('search')"
+                title="Explore">
+                <svg class="w-8 h-8 text-slate-500 group-[.active]:text-brand-primary transition-colors"
+                    fill="currentColor" viewBox="0 0 24 24">
+                    <path
+                        d="M4 10.5c-.83 0-1.5.67-1.5 1.5s.67 1.5 1.5 1.5 1.5-.67 1.5-1.5-.67-1.5-1.5-1.5zm0-6c-.83 0-1.5.67-1.5 1.5S3.17 7.5 4 7.5 5.5 6.83 5.5 6 4.83 4.5 4 4.5zm0 12c-.83 0-1.5.68-1.5 1.5s.68 1.5 1.5 1.5 1.5-.68 1.5-1.5-.67-1.5-1.5-1.5zM7 19h14v-2H7v2zm0-6h14v-2H7v2zm0-8v2h14V5H7z" />
+                </svg>
             </button>
         </nav>
 
         <div id="toast-container" class="toast-container"></div>
-
-    </div>
+    </main>
 
     <audio id="radio-audio"></audio>
 
@@ -121,7 +158,7 @@
         const stationList = document.getElementById('station-list');
         const syncBtn = document.getElementById('sync-btn');
         const searchViewResults = document.getElementById('search-view-results');
-        const vizToggleBtn = document.getElementById('viz-toggle-btn');
+        const visualizerArea = document.getElementById('visualizer');
 
         let currentHls = null;
         let activeStationId = null;
@@ -138,12 +175,17 @@
         let wakeLock = null;
         let canvas = null;
         let ctx = null;
+        let glowLines = [];
+        let sharpLines = [];
+        let smoothedData = null;
+        let eqCaps = new Array(64).fill(0);
+        let eqCapVelocity = new Array(64).fill(0);
 
         const DEFAULT_STATIONS = [
-          { id: 'kbs_classic', name: 'KBS 1FM (클래식)', freq: '93.1MHz', url: 'https://radio.bsod.kr/stream/?stn=kbs&ch=1fm', color: '#005bac' },
-          { id: 'kbs_cool', name: 'KBS 2FM (쿨FM)', freq: '89.1MHz', url: 'https://radio.bsod.kr/stream/?stn=kbs&ch=2fm', color: '#e30613' },
-          { id: 'mbc_sfm', name: 'MBC 표준FM', freq: '95.9MHz', url: 'https://radio.bsod.kr/stream/?stn=mbc&ch=sfm', color: '#e30613' },
-          { id: 'sbs_power', name: 'SBS 파워FM', freq: '107.7MHz', url: 'https://radio.bsod.kr/stream/?stn=sbs&ch=powerfm', color: '#00a0e9' }
+            { id: 'kbs_classic', name: 'KBS 1FM (클래식)', freq: '93.1MHz', url: 'https://radio.bsod.kr/stream/?stn=kbs&ch=1fm', color: '#005bac' },
+            { id: 'kbs_cool', name: 'KBS 2FM (쿨FM)', freq: '89.1MHz', url: 'https://radio.bsod.kr/stream/?stn=kbs&ch=2fm', color: '#e30613' },
+            { id: 'mbc_sfm', name: 'MBC 표준FM', freq: '95.9MHz', url: 'https://radio.bsod.kr/stream/?stn=mbc&ch=sfm', color: '#e30613' },
+            { id: 'sbs_power', name: 'SBS 파워FM', freq: '107.7MHz', url: 'https://radio.bsod.kr/stream/?stn=sbs&ch=powerfm', color: '#00a0e9' }
         ];
 
         const VERIFIED_KR_STATIONS = [
@@ -169,12 +211,17 @@
         ];
 
         function init() {
-            loadStations();
-            setupEventListeners();
-            initVisualizer();
-            updateVisualizerMode();
-            updateClock();
-            setInterval(updateClock, 1000);
+            try { loadStations(); } catch (e) { console.error(e); }
+            try { setupEventListeners(); } catch (e) { console.error(e); }
+            try { initVisualizer(); } catch (e) { console.error(e); }
+            try { updateVisualizerMode(); } catch (e) { console.error(e); }
+            try { updateClock(); } catch (e) { console.error(e); }
+            setInterval(() => {
+                try { updateClock(); } catch (e) { }
+            }, 1000);
+
+            // Initialize smoothed data
+            smoothedData = new Float32Array(128); // Based on expected fftSize
         }
 
         function updateClock() {
@@ -182,13 +229,9 @@
             let hours = now.getHours();
             const minutes = String(now.getMinutes()).padStart(2, '0');
             const ampm = hours >= 12 ? 'PM' : 'AM';
-            hours = hours % 12;
-            hours = hours ? hours : 12; 
-            
+            hours = hours % 12 || 12;
             const hoursStr = String(hours).padStart(2, '0');
-            // Wrap colon in a span for blinking effect
             const timeHTML = `${ampm} ${hoursStr}<span class="blink-colon">:</span>${minutes}`;
-            
             const clockEl = document.getElementById('header-clock');
             if (clockEl) clockEl.innerHTML = timeHTML;
         }
@@ -204,23 +247,26 @@
             const sharpLayer = document.querySelector('.visualizer-sharp-layer');
             canvas = document.getElementById('viz-canvas');
             ctx = canvas.getContext('2d');
-            
+
             window.addEventListener('resize', resizeCanvas);
             resizeCanvas();
-            
-            // Re-initialize layers
+
             glowLayer.innerHTML = '';
-            for (let i = 0; i < 50; i++) {
+            glowLines = [];
+            for (let i = 0; i < 40; i++) { // Increased to fill width
                 const line = document.createElement('div');
                 line.className = 'glow-line';
                 glowLayer.appendChild(line);
+                glowLines.push(line);
             }
-            
+
             sharpLayer.innerHTML = '';
-            for (let i = 0; i < 80; i++) {
+            sharpLines = [];
+            for (let i = 0; i < 50; i++) { // Increased to fill width
                 const line = document.createElement('div');
                 line.className = 'sharp-line';
                 sharpLayer.appendChild(line);
+                sharpLines.push(line);
             }
         }
 
@@ -229,189 +275,237 @@
             try {
                 audioCtx = new (window.AudioContext || window.webkitAudioContext)();
                 analyser = audioCtx.createAnalyser();
-                audio.crossOrigin = "anonymous"; 
+                audio.crossOrigin = "anonymous";
                 source = audioCtx.createMediaElementSource(audio);
                 source.connect(analyser);
                 analyser.connect(audioCtx.destination);
                 analyser.fftSize = 256;
-                const bufferLength = analyser.frequencyBinCount;
-                dataArray = new Uint8Array(bufferLength);
+                dataArray = new Uint8Array(analyser.frequencyBinCount);
             } catch (e) {
                 console.error("Web Audio API Error:", e);
             }
         }
 
         function renderFrame() {
-            if (!isPlaying || vizMode === 'off') {
-                animationId = requestAnimationFrame(renderFrame);
-                return;
-            }
+            animationId = requestAnimationFrame(renderFrame);
+            if (!isPlaying || vizMode === 'off') return;
 
             if (analyser) {
                 analyser.getByteFrequencyData(dataArray);
                 
-                if (vizMode === 'spectrum') {
-                    // --- Style 3: Sharp Dense Spectrum (Image 3) ---
-                    const lines = document.querySelectorAll('.sharp-line');
-                    const step = Math.floor(dataArray.length / lines.length);
-                    lines.forEach((line, i) => {
-                        const val = dataArray[i * step] || 0;
-                        const height = Math.max(5, (val / 255) * 100);
-                        line.style.height = height + '%';
-                        line.style.opacity = 0.3 + (val / 255) * 0.7;
-                    });
-                } else if (vizMode === 'waves') {
-                    // --- Style 1: Symmetrical Glow Waves (Image 2) ---
-                    const lines = document.querySelectorAll('.glow-line');
-                    const step = Math.floor(dataArray.length / lines.length);
-                    lines.forEach((line, i) => {
-                        const val = dataArray[i * step] || 0;
-                        const height = Math.max(8, (val / 255) * 85);
-                        line.style.height = height + '%';
-                        line.style.opacity = 0.5 + (val / 255) * 0.5;
-                    });
-                } else if (vizMode === 'ring') {
-                    // --- Style 2: Nebula Ring (Volumetric Particle Swarm) ---
-                    if (!ctx) return;
-                    const w = canvas.width;
-                    const h = canvas.height;
-                    const cx = w / 2;
-                    const cy = h / 2;
-                    ctx.clearRect(0, 0, w, h);
-                    ctx.globalCompositeOperation = 'lighter';
+                // Apply global temporal smoothing
+                if (!smoothedData || smoothedData.length !== dataArray.length) {
+                    smoothedData = new Float32Array(dataArray.length);
+                }
+                for (let i = 0; i < dataArray.length; i++) {
+                    smoothedData[i] += (dataArray[i] - smoothedData[i]) * 0.12;
+                }
+            }
+            if (vizMode === 'waves') {
+                if (glowLines.length === 0) return;
+                const step = Math.floor(dataArray.length / glowLines.length);
+                glowLines.forEach((line, i) => {
+                    const val = dataArray[i * step] || 0;
+                    const height = Math.max(8, (val / 255) * 85);
+                    line.style.height = height + '%';
+                    line.style.opacity = 0.5 + (val / 255) * 0.5;
+                });
+            } else if (vizMode !== 'off') {
+                if (!ctx) return;
+                const w = canvas.width;
+                const h = canvas.height;
+                const cx = w / 2;
+                const cy = h / 2;
+                ctx.clearRect(0, 0, w, h);
 
+                if (vizMode === 'ring') {
                     const time = Date.now();
-                    const layers = [
-                        { h: 190, r: h * 0.28, count: 40, weight: 0.5, speed: 0.0005 }, // Cyan Nebula
-                        { h: 280, r: h * 0.30, count: 35, weight: 0.7, speed: 0.0007 }, // Purple Nebula
-                        { h: 40, r: h * 0.26, count: 25, weight: 0.9, speed: 0.0004 }   // Gold Nebula
-                    ];
-
-                    layers.forEach((l, idx) => {
-                        const segments = 80;
-                        const rotation = time * l.speed;
-                        
-                        for (let n = 0; n < l.count; n++) {
-                            ctx.beginPath();
-                            const opacity = Math.random() * 0.15 + 0.05;
-                            ctx.strokeStyle = `hsla(${l.h + (Math.random()*15-7.5)}, 100%, 70%, ${opacity})`;
-                            ctx.lineWidth = l.weight + Math.random() * 0.5;
-                            
-                            const nOffset = n * Math.PI / 10;
-                            
-                            for (let i = 0; i <= segments; i++) {
-                                const angle = (i / segments) * Math.PI * 2;
-                                const freqIdx = Math.floor(Math.abs(Math.sin(angle + nOffset)) * (dataArray.length / 2));
-                                const val = dataArray[freqIdx] / 255.0;
-                                
-                                const wave = Math.sin(angle * 4 + time * 0.005 + nOffset) * 10 + 
-                                             Math.cos(angle * 3 - time * 0.003 + nOffset) * 8;
-                                
-                                const r = l.r + (val * 40) + wave + (Math.sin(n + time * 0.002) * 5);
-                                
-                                const x = cx + Math.cos(angle + rotation) * r;
-                                const y = cy + Math.sin(angle + rotation) * r;
-
-                                if (i === 0) ctx.moveTo(x, y);
-                                else ctx.lineTo(x, y);
-                            }
-                            ctx.stroke();
-                        }
-
-                        // Dense Particle Stardust (Bokeh effect)
-                        for (let p = 0; p < 15; p++) {
-                            const pAngle = Math.random() * Math.PI * 2;
-                            const pDist = l.r + (Math.sin(time * 0.001 + idx) * 15) + (Math.random() - 0.5) * 80;
-                            const px = cx + Math.cos(pAngle + rotation * 0.5) * pDist;
-                            const py = cy + Math.sin(pAngle + rotation * 0.5) * pDist;
-                            const pSize = Math.random() * 2;
-                            
-                            ctx.fillStyle = `hsla(${l.h}, 90%, 80%, ${Math.random() * 0.25})`;
-                            ctx.beginPath();
-                            ctx.arc(px, py, pSize, 0, Math.PI * 2);
-                            ctx.fill();
-                        }
-                    });
-                    ctx.globalCompositeOperation = 'source-over';
-                } else if (vizMode === 'cyber') {
-                    // --- Style 4: Cyber multi-layer Wave (Reference Image) ---
-                    if (!ctx) return;
-                    const w = canvas.width;
-                    const h = canvas.height;
-                    ctx.clearRect(0, 0, w, h);
+                    const bass = (smoothedData[2] / 255);
+                    const layerCount = 6;
                     
-                    const layers = 6;
-                    for (let l = 0; l < layers; l++) {
-                        ctx.beginPath();
-                        ctx.lineWidth = 1 + (l * 0.5);
-                        const alpha = 0.1 + (l / layers) * 0.6;
-                        const hue = 180 + (l * 15); // Cyan to Purple
-                        ctx.strokeStyle = `hsla(${hue}, 80%, 60%, ${alpha})`;
-                        ctx.shadowBlur = 10;
-                        ctx.shadowColor = `hsla(${hue}, 80%, 50%, 0.5)`;
+                    ctx.globalCompositeOperation = 'lighter';
+                    
+                    const pulseGlow = ctx.createRadialGradient(cx, cy, 0, cx, cy, h * 0.4);
+                    pulseGlow.addColorStop(0, `hsla(280, 100%, 50%, ${bass * 0.15})`);
+                    pulseGlow.addColorStop(1, 'transparent');
+                    ctx.fillStyle = pulseGlow;
+                    ctx.fillRect(0, 0, w, h);
 
-                        const step = w / (dataArray.length / 2);
-                        ctx.moveTo(0, h / 2);
+                    for (let l = 0; l < layerCount; l++) {
+                        const segments = 120;
+                        const layerPhase = l * (Math.PI / 3);
+                        const hue = (280 + l * 20 + time * 0.01) % 360; 
+                        const opacity = 0.3 + (1 - l / layerCount) * 0.5;
                         
-                        for (let i = 0; i < dataArray.length / 2; i++) {
-                            const val = dataArray[i] / 255.0;
-                            const x = i * step;
-                            const offset = (Math.sin(Date.now() * 0.002 + l + i * 0.1) * 20);
-                            const y = h / 2 + (val * h * 0.4 * Math.sin(i * 0.05 + Date.now() * 0.001 * l)) + offset;
+                        ctx.beginPath();
+                        ctx.lineWidth = 1.5 + (1 - l / layerCount) * 4;
+                        ctx.strokeStyle = `hsla(${hue}, 100%, 75%, ${opacity})`;
+                        ctx.shadowBlur = 10 + bass * 25;
+                        ctx.shadowColor = `hsla(${hue}, 100%, 50%, 0.5)`;
+                        
+                        for (let i = 0; i <= segments; i++) {
+                            const angle = (i / segments) * Math.PI * 2;
+                            const freqIdx = Math.floor(Math.abs(Math.sin(angle * 2)) * 30 + l * 5) % smoothedData.length;
+                            const audioVal = (smoothedData[freqIdx] / 255);
+                            
+                            const warp = Math.sin(angle * 4 + time * 0.002 + layerPhase) * 15 +
+                                        Math.sin(angle * 8 - time * 0.003) * 10 +
+                                        Math.sin(angle * 3 + time * 0.001) * 20;
+                                        
+                            const radius = (h * 0.25) + (audioVal * h * 0.15) + (warp * (0.5 + bass));
+                            const x = cx + Math.cos(angle) * radius;
+                            const y = cy + Math.sin(angle) * radius;
                             
                             if (i === 0) ctx.moveTo(x, y);
                             else ctx.lineTo(x, y);
                         }
+                        ctx.closePath();
                         ctx.stroke();
+                        
+                        if (l % 2 === 0) {
+                            ctx.globalAlpha = 0.05 * opacity;
+                            ctx.fill();
+                            ctx.globalAlpha = 1.0;
+                        }
                     }
+                    ctx.shadowBlur = 0;
+                    ctx.globalCompositeOperation = 'source-over';
+                } else if (vizMode === 'cyber') {
+                    const time = Date.now();
+                    const lineCount = 3;
+                    const baseHue = 210;
+                    const bass = (smoothedData[2] / 255);
+
+                    for (let l = 0; l < lineCount; l++) {
+                        const layerOffset = l * 0.5;
+                        const opacity = 0.6 - (l * 0.15);
+                        ctx.beginPath();
+                        ctx.strokeStyle = `hsla(${baseHue + l * 20}, 90%, 65%, ${opacity})`;
+                        ctx.lineWidth = 2 + (lineCount - l) + (bass * 5);
+
+                        const sliceWidth = w / (smoothedData.length / 4);
+                        let x = 0;
+
+                        for (let i = 0; i < smoothedData.length / 4; i++) {
+                            const val = (smoothedData[i] / 255.0);
+                            const shift = Math.sin(i * 0.2 + time * 0.004 + layerOffset) * (val * h * 0.3);
+                            const y = h / 2 + shift;
+
+                            if (i === 0) ctx.moveTo(x, y);
+                            else ctx.lineTo(x, y);
+                            x += sliceWidth;
+                        }
+                        ctx.stroke();
+                        ctx.shadowBlur = 10 + bass * 20;
+                        ctx.shadowColor = `hsla(${baseHue + l * 20}, 90%, 65%, 0.5)`;
+                    }
+                    ctx.shadowBlur = 0;
+                } else if (vizMode === 'mono') {
+                    const step = Math.ceil(w / 64);
+                    const bass = (smoothedData[2] / 255);
+                    
+                    for (let x = 0; x < w; x += step) {
+                        const i = Math.floor((x / w) * 64);
+                        const val = smoothedData[i] || 0;
+                        const barH = (val / 255) * h * 0.75;
+                        const hue = (i / 64) * 360 + (bass * 50);
+                        
+                        ctx.fillStyle = `hsla(${hue}, 100%, 60%, 0.8)`;
+                        ctx.shadowBlur = 10 + (val/255)*15;
+                        ctx.shadowColor = `hsla(${hue}, 100%, 50%, 0.6)`;
+                        ctx.fillRect(x, h - barH, step - 1, barH);
+                        
+                        if (barH > eqCaps[i]) {
+                            eqCaps[i] = barH;
+                            eqCapVelocity[i] = 0;
+                        } else {
+                            eqCapVelocity[i] += 0.4;
+                            eqCaps[i] -= eqCapVelocity[i];
+                            if (eqCaps[i] < 0) eqCaps[i] = 0;
+                        }
+                        
+                        ctx.fillStyle = '#fff';
+                        ctx.shadowBlur = 15; ctx.shadowColor = '#fff';
+                        ctx.fillRect(x, h - eqCaps[i] - 3, step - 1, 3);
+                        
+                        ctx.shadowBlur = 0;
+                        ctx.fillStyle = `hsla(${hue}, 100%, 60%, 0.2)`;
+                        ctx.fillRect(x, h - barH - 12, step - 1, 6);
+                    }
+                    ctx.shadowBlur = 0;
+                } else if (vizMode === 'fire_wave') {
+                    const time = Date.now();
+                    const lineCount = 20;
+                    const bass = (smoothedData[2] / 255);
+
+                    ctx.save();
+                    ctx.lineJoin = 'round';
+
+                    for (let l = 0; l < lineCount; l++) {
+                        const z = 1 - (l / lineCount);
+                        const opacity = Math.pow(z, 1.5) * 0.7;
+                        const hue = 280 - (z * 100);
+                        const lightness = 50 + (z * 20);
+
+                        ctx.beginPath();
+                        ctx.strokeStyle = `hsla(${hue}, 100%, ${lightness}%, ${opacity})`;
+                        ctx.lineWidth = 1 + (z * 3);
+
+                        const vanishingX = w;
+                        const segments = 120;
+                        const stepX = w / segments;
+
+                        for (let i = 0; i <= segments; i++) {
+                            const prog = i / segments;
+                            const depthFac = 1 - prog; 
+                            const freqIdx = Math.floor(z * 40 + i * 0.2) % smoothedData.length;
+                            const val = (smoothedData[freqIdx] / 255);
+                            const wave = Math.sin(i * 0.15 - time * 0.005 + l * 0.3) * (val * h * 0.45 * depthFac * z);
+                            const posX = i * stepX;
+                            const posY = cy + wave;
+                            const finalX = posX * (1 - prog) + vanishingX * prog;
+                            const finalY = posY * (1 - prog) + cy * prog;
+
+                            if (i === 0) ctx.moveTo(finalX, finalY);
+                            else ctx.lineTo(finalX, finalY);
+                        }
+                        ctx.stroke();
+                        
+                        if (bass > 0.8 && l > lineCount - 5) {
+                            ctx.shadowBlur = 15; ctx.shadowColor = '#00f2ff';
+                            ctx.stroke();
+                            ctx.shadowBlur = 0;
+                        }
+                    }
+                    ctx.restore();
                 }
             }
-            animationId = requestAnimationFrame(renderFrame);
-        }
-
-        function getAvg(array, start, end) {
-            let sum = 0;
-            for(let i = start; i < end; i++) sum += array[i];
-            return sum / (end - start);
         }
 
         function loadStations() {
             const saved = localStorage.getItem('radio_stations');
-            if (saved) {
-                userStations = JSON.parse(saved);
-            } else {
-                userStations = [...DEFAULT_STATIONS];
-            }
+            userStations = saved ? JSON.parse(saved) : [...DEFAULT_STATIONS];
             renderStations();
             renderSearchList();
         }
 
-        function saveToLocalStorage() {
-            localStorage.setItem('radio_stations', JSON.stringify(userStations));
-        }
-
         function renderStations() {
             if (userStations.length === 0) {
-                stationList.innerHTML = `
-                    <div class="empty-state">
-                        <div class="empty-icon">📻</div>
-                        <p>즐겨찾기한 방송이 없습니다.</p>
-                        <p class="empty-subtext">검색 페이지에서 하트를 눌러 추가해보세요!</p>
-                    </div>
-                `;
+                stationList.innerHTML = `<div class="p-8 text-center opacity-40 text-sm">즐겨찾기한 방송이 없습니다.</div>`;
                 return;
             }
             stationList.innerHTML = userStations.map(s => `
-                <div class="station-item ${s.id === activeStationId ? 'active' : ''}" 
-                     data-id="${s.id}" 
-                     onclick="selectStation('${s.id}')">
-                    <div class="station-info">
-                        <div class="station-freq">${s.freq}</div>
-                        <div class="station-name">${s.name}</div>
+                <div id="item-${s.id}" class="station-card ${s.id === activeStationId ? 'active' : ''}" onclick="selectStation('${s.id}')">
+                    <div class="station-badge">${s.freq.replace('MHz', '')}</div>
+                    <div class="flex-grow min-w-0">
+                        <h3 class="font-semibold text-slate-100 truncate">${s.name}</h3>
+                        <p class="text-[10px] text-slate-400 uppercase tracking-tighter truncate">Favorite Station</p>
                     </div>
-                    <button class="btn-delete" title="즐겨찾기 삭제" onclick="window.removeStation(event, '${s.id}')">
-                        <svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
-                    </button>
+                    <div class="flex items-center gap-1">
+                        <button class="p-2 text-brand-accent hover:scale-110 active:scale-95 transition-all" onclick="window.removeStation(event, '${s.id}')" title="삭제">
+                            <svg class="h-5 w-5 fill-current" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+                        </button>
+                    </div>
                 </div>
             `).join('');
         }
@@ -420,25 +514,24 @@
             searchViewResults.innerHTML = VERIFIED_KR_STATIONS.map(s => {
                 const url = `https://radio.bsod.kr/stream/?stn=${s.stn}${s.ch ? '&ch=' + s.ch : ''}`;
                 const isSaved = userStations.some(us => us.url === url);
-                const sData = encodeURIComponent(JSON.stringify({
-                    name: s.name,
-                    url: url,
-                    tags: s.tags,
-                    freq: s.freq
-                }));
+                const sData = encodeURIComponent(JSON.stringify({ name: s.name, url: url, freq: s.freq }));
+                const freqText = s.freq.replace('MHz', '');
                 return `
-                    <div class="search-result-item-card">
-                        <div class="sr-info" onclick="window.previewStation('${url}', '${s.name}')">
-                            <span class="sr-name">${s.name}</span>
-                            <span class="sr-tags">${s.tags} | ${s.freq}</span>
+                    <div class="station-card" onclick="window.previewStation('${url}', '${s.name}', '${s.freq}')">
+                        <div class="station-badge">${freqText}</div>
+                        <div class="flex-grow min-w-0">
+                            <h3 class="font-semibold text-slate-100 truncate">${s.name}</h3>
+                            <p class="text-[10px] text-slate-400 uppercase tracking-tighter truncate">${s.tags}</p>
                         </div>
-                        <div class="sr-actions">
-                            <button class="btn-preview-circle" onclick="window.previewStation('${url}', '${s.name}')" title="미리듣기">
-                                <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                        <div class="flex items-center gap-1">
+                            <button class="p-2 text-brand-primary hover:scale-110 active:scale-95 transition-all" title="재생">
+                                <svg class="h-5 w-5 fill-current" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
                             </button>
-                            <button class="btn-fav-toggle ${isSaved ? 'active' : ''}" 
-                                onclick="window.toggleFavorite(event, '${sData}')" title="즐겨찾기">
-                                <svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+                            <button class="p-2 ${isSaved ? 'text-brand-accent' : 'text-slate-500'} hover:scale-110 active:scale-95 transition-all" onclick="window.toggleFavorite(event, '${sData}')" title="즐겨찾기">
+                                ${isSaved ?
+                        `<svg class="h-5 w-5 fill-current" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>` :
+                        `<svg class="h-5 w-5 fill-none stroke-current" stroke-width="2" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>`
+                    }
                             </button>
                         </div>
                     </div>
@@ -449,146 +542,59 @@
         function setupEventListeners() {
             playBtn.addEventListener('click', togglePlay);
             syncBtn.addEventListener('click', synchronizeStreams);
-            if (vizToggleBtn) vizToggleBtn.addEventListener('click', cycleVisualizerMode);
+
+            // v1.2.0: Optimized Click Interaction for Top-Section Visualization Toggle
+            window.addEventListener('click', (e) => {
+                const nowPlayingSection = document.querySelector('section');
+
+                // Toggle ONLY if clicked inside Now Playing section but NOT on buttons/cards/interactive elements
+                if (nowPlayingSection && nowPlayingSection.contains(e.target)) {
+                    if (!e.target.closest('button') && !e.target.closest('.station-card')) {
+                        cycleVisualizerMode();
+                    }
+                }
+            });
         }
 
         function cycleVisualizerMode() {
-            if (vizMode === 'waves') vizMode = 'ring';
-            else if (vizMode === 'ring') vizMode = 'spectrum';
-            else if (vizMode === 'spectrum') vizMode = 'cyber';
-            else if (vizMode === 'cyber') vizMode = 'off';
-            else vizMode = 'waves';
+            const modes = ['waves', 'ring', 'cyber', 'mono', 'fire_wave', 'off'];
+            const modeNames = {
+                'waves': '🌊 파동',
+                'ring': '🥯 고리',
+                'cyber': '🌐 사이버',
+                'mono': '🌌 모노',
+                'fire_wave': '🌀 코스믹',
+                'off': '🌑 끄기'
+            };
+            vizMode = modes[(modes.indexOf(vizMode) + 1) % modes.length];
+            showToast(`시각화: ${modeNames[vizMode]}`);
             updateVisualizerMode();
         }
 
         function updateVisualizerMode() {
-            const container = document.getElementById('visualizer');
             const glow = document.querySelector('.visualizer-glow-layer');
-            const pulse = document.querySelector('.visualizer-pulse-layer');
             const sharp = document.querySelector('.visualizer-sharp-layer');
             const cvsLayer = document.getElementById('viz-canvas');
-            
+
             glow.style.display = vizMode === 'waves' ? 'flex' : 'none';
-            sharp.style.display = vizMode === 'spectrum' ? 'flex' : 'none';
-            cvsLayer.style.display = (vizMode === 'cyber' || vizMode === 'ring') ? 'block' : 'none';
-            container.style.opacity = vizMode === 'off' ? '0' : '1';
+            sharp.style.display = 'none'; // Spectrum removed
+            cvsLayer.style.display = (vizMode === 'cyber' || vizMode === 'ring' || vizMode === 'mono' || vizMode === 'fire_wave') ? 'block' : 'none';
 
-            if (vizMode === 'cyber' || vizMode === 'ring') {
-                setTimeout(resizeCanvas, 10);
-            }
+            if (vizMode === 'cyber' || vizMode === 'ring' || vizMode === 'mono' || vizMode === 'fire_wave') setTimeout(resizeCanvas, 10);
         }
-
-        async function synchronizeStreams() {
-            if (syncBtn.classList.contains('spinning')) return;
-            
-            syncBtn.classList.add('spinning');
-            showToast('방송 리스트를 최신 상태로 업데이트하고 있습니다...');
-            
-            // Simulation delay (actual network logic)
-            await new Promise(r => setTimeout(r, 2000));
-
-            userStations = userStations.map(station => {
-                const verified = VERIFIED_KR_STATIONS.find(v => v.name === station.name);
-                if (verified) {
-                    const latestUrl = `https://radio.bsod.kr/stream/?stn=${verified.stn}${verified.ch ? '&ch=' + verified.ch : ''}`;
-                    return { ...station, url: latestUrl, freq: verified.freq };
-                }
-                return station;
-            });
-
-            saveToLocalStorage();
-            renderStations();
-            renderSearchList();
-            
-            syncBtn.classList.remove('spinning');
-            showToast('✅ 모든 방송 주소가 최신 상태로 갱신되었습니다.', 'success');
-        }
-
-        function showToast(message, type = '') {
-            const container = document.getElementById('toast-container');
-            const toast = document.createElement('div');
-            toast.className = `toast ${type}`;
-            toast.innerHTML = `<span>${message}</span>`;
-            
-            container.appendChild(toast);
-            
-            setTimeout(() => {
-                toast.style.animation = 'toast-out 0.4s forwards';
-                setTimeout(() => toast.remove(), 400);
-            }, 3000);
-        }
-
-        window.previewStation = (url, stationData) => {
-            const name = typeof stationData === 'string' ? stationData : stationData.name;
-            activeStationId = 'preview';
-            freqDisplay.textContent = 'SCAN';
-            freqDisplay.classList.add('is-digital');
-            nameDisplay.textContent = 'CONNECTING...';
-            loadStream(url, { name: name });
-        };
-
-        window.toggleFavorite = (e, sEncoded) => {
-            e.stopPropagation();
-            const s = JSON.parse(decodeURIComponent(sEncoded));
-            const existingIdx = userStations.findIndex(us => us.name === s.name);
-
-            if (existingIdx > -1) {
-                userStations.splice(existingIdx, 1);
-            } else {
-                userStations.push({
-                    id: 'fav_' + Date.now(),
-                    name: s.name,
-                    freq: s.freq,
-                    url: s.url
-                });
-            }
-            saveToLocalStorage();
-            renderStations();
-            renderSearchList();
-        };
-
-        window.removeStation = (e, id) => {
-            e.stopPropagation();
-            if (confirm('즐겨찾기에서 삭제할까요?')) {
-                userStations = userStations.filter(us => us.id !== id);
-                if (activeStationId === id) pauseAudio();
-                saveToLocalStorage();
-                renderStations();
-                renderSearchList();
-            }
-        };
-
-        window.showPage = (pageId) => {
-            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-            document.getElementById(`page-${pageId}`).classList.add('active');
-            document.querySelectorAll('.nav-item').forEach(item => {
-                item.classList.toggle('active', item.getAttribute('onclick').includes(pageId));
-            });
-        };
 
         function selectStation(id) {
             const station = userStations.find(s => s.id === id);
             if (!station) return;
-
             activeStationId = id;
-            const freqText = station.freq.replace('MHz', '');
-            freqDisplay.textContent = freqText;
-            
-            // Toggle digital font style for non-numeric labels
-            if (isNaN(parseFloat(freqText))) {
-                freqDisplay.classList.add('is-digital');
-            } else {
-                freqDisplay.classList.remove('is-digital');
-            }
-            
-            nameDisplay.textContent = 'LOADING...';
+            freqDisplay.textContent = station.freq.replace('MHz', '') || '--.-';
+            nameDisplay.textContent = 'CONNECTING...';
             renderStations();
             loadStream(station.url, station);
         }
 
         function loadStream(url, station) {
             if (currentHls) currentHls.destroy();
-
             if (Hls.isSupported()) {
                 currentHls = new Hls();
                 currentHls.loadSource(url);
@@ -596,21 +602,6 @@
                 currentHls.on(Hls.Events.MANIFEST_PARSED, () => {
                     nameDisplay.textContent = station.name;
                     playAudio();
-                });
-                currentHls.on(Hls.Events.ERROR, (event, data) => {
-                    if (data.fatal) {
-                        switch (data.type) {
-                            case Hls.ErrorTypes.NETWORK_ERROR:
-                                currentHls.startLoad();
-                                break;
-                            case Hls.ErrorTypes.MEDIA_ERROR:
-                                currentHls.recoverMediaError();
-                                break;
-                            default:
-                                currentHls.destroy();
-                                break;
-                        }
-                    }
                 });
             } else if (audio.canPlayType('application/vnd.apple.mpegurl')) {
                 audio.src = url;
@@ -628,24 +619,20 @@
 
         function playAudio() {
             if (!audio.src && !currentHls) return;
-            
-            // Web Audio API Init on user gesture
             initAudioContext();
-            if (audioCtx && audioCtx.state === 'suspended') {
-                audioCtx.resume();
-            }
-
+            if (audioCtx?.state === 'suspended') audioCtx.resume();
             audio.play().then(() => {
                 isPlaying = true;
                 playIcon.style.display = 'none';
                 pauseIcon.style.display = 'block';
-                document.getElementById('visualizer').classList.add('active');
+                // Trigger visualizer auto-start logic
                 if (!animationId) renderFrame();
-                
-                // Mobile Optimization
-                requestWakeLock();
-                updateMediaSession();
-            }).catch(e => console.error('Play failed:', e));
+                // Ensure viz mode is not 'off' if we want it auto-on
+                if (vizMode === 'off') {
+                    vizMode = 'waves';
+                    updateVisualizerMode();
+                }
+            }).catch(e => console.error(e));
         }
 
         function pauseAudio() {
@@ -653,70 +640,75 @@
             isPlaying = false;
             playIcon.style.display = 'block';
             pauseIcon.style.display = 'none';
-            document.getElementById('visualizer').classList.remove('active');
-            // Reset visualizer state
-            resetVisualizerUI();
-            
-            // Mobile Optimization
-            releaseWakeLock();
-            updateMediaSession();
         }
 
-        async function requestWakeLock() {
-            if ('wakeLock' in navigator) {
-                try {
-                    wakeLock = await navigator.wakeLock.request('screen');
-                    console.log('Wake Lock is active');
-                } catch (err) {
-                    console.error(`${err.name}, ${err.message}`);
-                }
-            }
+        async function synchronizeStreams() {
+            if (syncBtn.classList.contains('spinning')) return;
+            syncBtn.classList.add('spinning');
+            showToast('방송 리스트 동기화 중...');
+            await new Promise(r => setTimeout(r, 1500));
+            loadStations();
+            syncBtn.classList.remove('spinning');
+            showToast('✅ 업데이트 완료', 'success');
         }
 
-        function releaseWakeLock() {
-            if (wakeLock !== null) {
-                wakeLock.release().then(() => {
-                    wakeLock = null;
-                    console.log('Wake Lock released');
-                });
-            }
+        function showToast(message, type = '') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.textContent = message;
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.style.animation = 'toast-out 0.4s forwards';
+                setTimeout(() => toast.remove(), 400);
+            }, 2500);
         }
 
-        function updateMediaSession() {
-            if ('mediaSession' in navigator) {
-                const name = nameDisplay.textContent || 'Premium K-Radio';
-                navigator.mediaSession.metadata = new MediaMetadata({
-                    title: name,
-                    artist: 'Premium K-Radio',
-                    album: freqDisplay.textContent,
-                    artwork: [
-                        { src: 'https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?w=512&h=512&fit=crop', sizes: '512x512', type: 'image/jpeg' }
-                    ]
-                });
+        window.showPage = (id) => {
+            document.querySelectorAll('.page').forEach(p => p.style.display = 'none');
+            // Home is block, Search is flex (to fill column)
+            const targetPage = document.getElementById(`page-${id}`);
+            targetPage.style.display = 'flex';
 
-                navigator.mediaSession.playbackState = isPlaying ? 'playing' : 'paused';
+            document.querySelectorAll('.nav-item').forEach(btn => {
+                btn.classList.toggle('active', btn.getAttribute('onclick').includes(id));
+            });
+        };
 
-                navigator.mediaSession.setActionHandler('play', () => {
-                    playAudio();
-                });
-                navigator.mediaSession.setActionHandler('pause', () => {
-                    pauseAudio();
-                });
-            }
-        }
+        window.previewStation = (url, name, freq) => {
+            activeStationId = 'preview';
+            freqDisplay.textContent = freq ? freq.replace('MHz', '') : '--.-';
+            nameDisplay.textContent = 'CONNECTING...';
+            loadStream(url, { name });
+        };
 
-        function resetVisualizerUI() {
-            document.querySelectorAll('.visualizer-bar').forEach(b => b.style.height = '4%');
-            document.querySelectorAll('.wave').forEach(w => w.style.transform = 'translate3d(0, 80%, 0) scaleY(0.5)');
-        }
+        window.toggleFavorite = (e, sEncoded) => {
+            e.stopPropagation();
+            const s = JSON.parse(decodeURIComponent(sEncoded));
+            const idx = userStations.findIndex(us => us.name === s.name);
+            if (idx > -1) userStations.splice(idx, 1);
+            else userStations.push({ id: 'fav_' + Date.now(), name: s.name, freq: s.freq, url: s.url });
+            localStorage.setItem('radio_stations', JSON.stringify(userStations));
+            renderStations();
+            renderSearchList();
+        };
 
-        init();
+        window.removeStation = (e, id) => {
+            e.stopPropagation();
+            userStations = userStations.filter(us => us.id !== id);
+            localStorage.setItem('radio_stations', JSON.stringify(userStations));
+            renderStations();
+            renderSearchList(); // Sync search list heart state too
+        };
+
+        window.addEventListener('load', init);
     </script>
+
     <script>
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('sw.js')
-                .then(() => console.log('Service Worker Registered'));
+            navigator.serviceWorker.register('sw.js?v=29').then(() => console.log('SW Registered'));
         }
     </script>
 </body>
+
 </html>
