@@ -1,6 +1,6 @@
 {
-  "name": "K-Radio Premium",
-  "short_name": "K-Radio",
+  "name": "Daddy Radio",
+  "short_name": "Daddy Radio",
   "description": "Premium Korean Radio Streaming Web App",
   "start_url": "/Radio/",
   "scope": "/Radio/",
