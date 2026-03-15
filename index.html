@@ -4,8 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>아빠 라디오 v2.1.0 - 우리가족 </title>
-    <link rel="manifest" href="manifest.json?v=4">
+    <title>아빠 라디오 v2.2.0 - 우리가족 </title>
+    <link rel="manifest" href="manifest.json?v=2.2.0">
     <meta name="theme-color" content="#0f172a">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -45,7 +45,7 @@
 
 <body class="bg-brand-dark text-white font-sans selection:bg-brand-primary/30 min-h-screen">
     <main
-        class="flex flex-col h-screen h-[100dvh] app-main-width overflow-hidden bg-brand-dark border-x border-slate-800 pb-20">
+        class="flex flex-col h-screen h-[100dvh] app-main-width overflow-hidden bg-brand-dark border-x border-slate-800 pb-20 no-scrollbar">
         <!-- TOP SECTION: Now Playing -->
         <section
             class="flex-none p-6 pt-12 pb-10 bg-gradient-to-b from-brand-surface to-brand-dark rounded-b-[3rem] shadow-2xl relative overflow-hidden">
@@ -56,7 +56,7 @@
                 <div class="flex justify-between w-full items-center mb-6">
                     <div class="logo">
                         <span class="text-2xl font-black tracking-tighter text-white">Daddy Radio <small
-                                class="ml-1 text-[0.75rem] opacity-40 font-bold tracking-widest uppercase">v2.1.0</small></span>
+                                class="ml-1 text-[0.75rem] opacity-40 font-bold tracking-widest uppercase">v2.2.0</small></span>
                     </div>
                     <div id="header-clock"
                         class="text-2xl font-mono text-brand-primary opacity-90 uppercase tracking-widest">PM 00:00
@@ -733,7 +733,7 @@
 
     <script>
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('sw.js?v=32').then(() => console.log('SW Registered'));
+            navigator.serviceWorker.register('sw.js?v=2.2.0').then(() => console.log('SW Registered'));
         }
     </script>
 </body>

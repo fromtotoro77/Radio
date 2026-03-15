@@ -69,10 +69,11 @@ html {
 .main-scrollable {
   height: auto !important;
   overflow-y: auto !important;
+  display: flex !important; /* display: flex 유지 */
 }
 
 .main-scrollable .page.active {
-  display: block !important;
+  display: flex !important; /* block에서 flex로 변경하여 일관성 유지 */
   height: auto !important;
   overflow: visible !important;
 }
