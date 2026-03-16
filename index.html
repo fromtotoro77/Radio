@@ -4,8 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>아빠 라디오 v2.2.0 - 우리가족 </title>
-    <link rel="manifest" href="manifest.json?v=2.2.0">
+    <title>아빠 라디오 v2.3.0 - 우리가족 </title>
+    <link rel="manifest" href="manifest.json?v=2.3.0">
     <meta name="theme-color" content="#0f172a">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -45,26 +45,30 @@
 
 <body class="bg-brand-dark text-white font-sans selection:bg-brand-primary/30 min-h-screen">
     <main
-        class="flex flex-col h-screen h-[100dvh] app-main-width overflow-hidden bg-brand-dark border-x border-slate-800 pb-20 no-scrollbar">
-        <!-- TOP SECTION: Now Playing -->
-        <section
-            class="flex-none p-6 pt-12 pb-10 bg-gradient-to-b from-brand-surface to-brand-dark rounded-b-[3rem] shadow-2xl relative overflow-hidden">
+        class="flex flex-col h-screen h-[100dvh] app-main-width overflow-hidden bg-brand-dark border-x border-slate-800 no-scrollbar">
+        <!-- FIXED TOP HEADER: Logo & Clock (Yellow Area) -->
+        <header class="flex-none p-6 pt-12 pb-4 bg-brand-dark z-50">
+            <div class="flex justify-between w-full items-center">
+                <div class="logo">
+                    <span class="text-2xl font-black tracking-tighter text-white">Daddy Radio <small
+                            class="ml-1 text-[0.75rem] opacity-40 font-bold tracking-widest uppercase">v2.3.0</small></span>
+                </div>
+                <div id="header-clock"
+                    class="text-2xl font-mono text-brand-primary opacity-90 uppercase tracking-widest">PM 00:00
+                </div>
+            </div>
+        </header>
+
+        <!-- TOP SECTION: Player Controls (Red Area reduced & Gradient smoothed) -->
+        <section id="top-header-section"
+            class="flex-none px-6 pb-2 bg-gradient-to-b from-brand-dark via-brand-surface to-brand-dark rounded-b-xl shadow-lg relative overflow-hidden transition-all duration-300">
             <!-- Background Glow Decoration -->
-            <div class="absolute -top-20 -right-20 w-64 h-64 bg-brand-primary/20 rounded-full blur-[80px]"></div>
+            <div class="absolute -top-10 -right-10 w-48 h-48 bg-brand-primary/5 rounded-full blur-[60px]"></div>
 
             <div class="relative z-10 flex flex-col items-center">
-                <div class="flex justify-between w-full items-center mb-6">
-                    <div class="logo">
-                        <span class="text-2xl font-black tracking-tighter text-white">Daddy Radio <small
-                                class="ml-1 text-[0.75rem] opacity-40 font-bold tracking-widest uppercase">v2.2.0</small></span>
-                    </div>
-                    <div id="header-clock"
-                        class="text-2xl font-mono text-brand-primary opacity-90 uppercase tracking-widest">PM 00:00
-                    </div>
-                </div>
 
                 <!-- v1.2.1: Isolated Visualizer Boundary Area (Below Title Row) -->
-                <div class="relative w-full flex flex-col items-center py-4 overflow-hidden rounded-2xl min-h-[260px]">
+                <div id="player-controls-ui" class="relative w-full flex flex-col items-center py-4 overflow-hidden rounded-2xl min-h-[260px] transition-all duration-300">
                     <div id="visualizer" class="visualizer-container">
                         <div class="visualizer-glow-layer flex items-center justify-center gap-1.5 h-full w-full"></div>
                         <div class="visualizer-sharp-layer flex justify-center gap-0.5 h-full w-full"
@@ -96,7 +100,7 @@
         </section>
 
         <!-- PAGE: Home (Favorites) -->
-        <div id="page-home" class="page active flex-grow flex flex-col overflow-hidden px-6 pt-12 pb-8 no-scrollbar">
+        <div id="page-home" class="page active flex-grow flex flex-col overflow-hidden px-6 pt-4 pb-8 no-scrollbar">
             <div class="flex-none flex items-center justify-between mb-4">
                 <h2 class="text-xl font-bold">MY FAVORITES</h2>
             </div>
@@ -106,7 +110,7 @@
         </div>
 
         <!-- PAGE: Search (Explorer) -->
-        <div id="page-search" class="page flex-grow flex flex-col overflow-hidden px-6 pt-12 pb-8 no-scrollbar"
+        <div id="page-search" class="page flex-grow flex flex-col overflow-hidden px-6 pt-4 pb-8 no-scrollbar"
             style="display: none;">
             <div class="flex-none flex items-center justify-between mb-4">
                 <h2 class="text-xl font-bold">RADIO LIST</h2>
@@ -124,25 +128,6 @@
             </div>
         </div>
 
-        <!-- BOTTOM NAV -->
-        <nav
-            class="fixed bottom-0 h-20 bg-brand-surface/95 backdrop-blur-xl border-t border-slate-700/50 flex items-center justify-around px-10 z-50 bottom-nav-fixed">
-            <button class="nav-item active flex flex-col items-center justify-center group"
-                onclick="window.showPage('home')" title="Radio">
-                <svg class="w-8 h-8 text-slate-500 group-[.active]:text-brand-primary transition-colors"
-                    fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" />
-                </svg>
-            </button>
-            <button class="nav-item flex flex-col items-center justify-center group" onclick="window.showPage('search')"
-                title="Explore">
-                <svg class="w-8 h-8 text-slate-500 group-[.active]:text-brand-primary transition-colors"
-                    fill="currentColor" viewBox="0 0 24 24">
-                    <path
-                        d="M4 10.5c-.83 0-1.5.67-1.5 1.5s.67 1.5 1.5 1.5 1.5-.67 1.5-1.5-.67-1.5-1.5-1.5zm0-6c-.83 0-1.5.67-1.5 1.5S3.17 7.5 4 7.5 5.5 6.83 5.5 6 4.83 4.5 4 4.5zm0 12c-.83 0-1.5.68-1.5 1.5s.68 1.5 1.5 1.5 1.5-.68 1.5-1.5-.67-1.5-1.5-1.5zM7 19h14v-2H7v2zm0-6h14v-2H7v2zm0-8v2h14V5H7z" />
-                </svg>
-            </button>
-        </nav>
 
         <div id="toast-container" class="toast-container"></div>
     </main>
@@ -167,6 +152,7 @@
         let isPlaying = false;      // 재생 상태 플래그
         let userStations = [];      // 사용자 즐겨찾기 방송 목록
         let vizMode = 'waves';      // 현재 시각화 모드
+        let currentPage = 'home';   // 현재 활성화된 페이지
 
         // Web Audio API 관련 변수
         let audioCtx = null;        // 오디오 컨텍스트
@@ -311,7 +297,7 @@
                     smoothedData = new Float32Array(dataArray.length);
                 }
                 for (let i = 0; i < dataArray.length; i++) {
-                    smoothedData[i] += (dataArray[i] - smoothedData[i]) * 0.12;
+                    smoothedData[i] += (dataArray[i] - smoothedData[i]) * 0.08;
                 }
             }
 
@@ -355,12 +341,15 @@
                         ctx.stroke();
                     }
                 } else if (vizMode === 'cyber') {
-                    // 사이버 기하학(Cyber Grid)
+                    // 사이버 기하학(Cyber Grid) - 부드러운 곡선 보간 적용
                     const time = Date.now();
                     const bass = (smoothedData[2] / 255);
                     const baseHue = (time / 100) % 360;
                     const lineCount = 4;
                     ctx.shadowBlur = 10 + bass * 20;
+
+                    const pointsCount = Math.floor(smoothedData.length / 4);
+                    const sliceWidth = w / (pointsCount - 1);
 
                     for (let l = 0; l < lineCount; l++) {
                         const layerOffset = l * 0.5;
@@ -369,17 +358,24 @@
                         ctx.strokeStyle = `hsla(${baseHue + l * 20}, 90%, 65%, ${opacity})`;
                         ctx.lineWidth = 2 + (lineCount - l) + (bass * 5);
 
-                        const sliceWidth = w / (smoothedData.length / 4);
-                        let x = 0;
-
-                        for (let i = 0; i < smoothedData.length / 4; i++) {
+                        let points = [];
+                        for (let i = 0; i < pointsCount; i++) {
                             const val = (smoothedData[i] / 255.0);
-                            const shift = Math.sin(i * 0.2 + time * 0.004 + layerOffset) * (val * h * 0.3);
-                            const y = h / 2 + shift;
+                            const shift = Math.sin(i * 0.2 + time * 0.004 + layerOffset) * (val * h * 0.35);
+                            points.push({ x: i * sliceWidth, y: h / 2 + shift });
+                        }
 
-                            if (i === 0) ctx.moveTo(x, y);
-                            else ctx.lineTo(x, y);
-                            x += sliceWidth;
+                        if (points.length > 0) {
+                            ctx.moveTo(points[0].x, points[0].y);
+                            for (let i = 1; i < points.length - 2; i++) {
+                                const xc = (points[i].x + points[i + 1].x) / 2;
+                                const yc = (points[i].y + points[i + 1].y) / 2;
+                                ctx.quadraticCurveTo(points[i].x, points[i].y, xc, yc);
+                            }
+                            if (points.length > 2) {
+                                const i = points.length - 2;
+                                ctx.quadraticCurveTo(points[i].x, points[i].y, points[i + 1].x, points[i + 1].y);
+                            }
                         }
                         ctx.stroke();
                         ctx.shadowBlur = 10 + bass * 20;
@@ -387,7 +383,7 @@
                     }
                     ctx.shadowBlur = 0;
                 } else if (vizMode === 'mono') {
-                    // 모노 이퀄라이저(Mono EQ)
+                    // 모노 이퀄라이저(Mono EQ) - 차분한 톤(Indigo/Slate)으로 조정
                     const step = Math.ceil(w / 64);
                     const bass = (smoothedData[2] / 255);
 
@@ -395,11 +391,12 @@
                         const i = Math.floor((x / w) * 64);
                         const val = smoothedData[i] || 0;
                         const barH = (val / 255) * h * 0.75;
-                        const hue = (i / 64) * 360 + (bass * 50);
-
-                        ctx.fillStyle = `hsla(${hue}, 100%, 60%, 0.8)`;
-                        ctx.shadowBlur = 10 + (val / 255) * 15;
-                        ctx.shadowColor = `hsla(${hue}, 100%, 50%, 0.6)`;
+                        
+                        // 명도를 낮추고 브랜드 컬러(인디고)를 은은하게 적용
+                        const opacity = 0.2 + (val / 255) * 0.4;
+                        ctx.fillStyle = `rgba(99, 102, 241, ${opacity})`; // brand-primary 색상 적용
+                        ctx.shadowBlur = 2 + (val / 255) * 5;
+                        ctx.shadowColor = `rgba(99, 102, 241, 0.2)`;
                         ctx.fillRect(x, h - barH, step - 1, barH);
 
                         // 피크 캡 낙하 로직
@@ -412,13 +409,15 @@
                             if (eqCaps[i] < 0) eqCaps[i] = 0;
                         }
 
-                        ctx.fillStyle = '#fff';
-                        ctx.shadowBlur = 15; ctx.shadowColor = '#fff';
-                        ctx.fillRect(x, h - eqCaps[i] - 3, step - 1, 3);
+                        // 피크 캡도 너무 튀지 않게 인디고 화이트로 조정
+                        ctx.fillStyle = 'rgba(199, 210, 254, 0.8)'; 
+                        ctx.shadowBlur = 5; ctx.shadowColor = 'rgba(99, 102, 241, 0.4)';
+                        ctx.fillRect(x, h - eqCaps[i] - 1.5, step - 1, 1.5);
 
                         ctx.shadowBlur = 0;
-                        ctx.fillStyle = `hsla(${hue}, 100%, 60%, 0.2)`;
-                        ctx.fillRect(x, h - barH - 12, step - 1, 6);
+                        // 상층 잔상은 더 어둡게 처리
+                        ctx.fillStyle = `rgba(99, 102, 241, 0.05)`;
+                        ctx.fillRect(x, h - barH - 6, step - 1, 2);
                     }
                     ctx.shadowBlur = 0;
                 } else if (vizMode === 'fire_wave') {
@@ -544,6 +543,31 @@
         function setupEventListeners() {
             playBtn.addEventListener('click', togglePlay);
             syncBtn.addEventListener('click', synchronizeStreams);
+
+            // 스와이프 제스처 설정
+            let touchStartX = 0;
+            let touchEndX = 0;
+            const swipeThreshold = 50;
+
+            document.addEventListener('touchstart', (e) => {
+                touchStartX = e.changedTouches[0].screenX;
+            }, false);
+
+            document.addEventListener('touchend', (e) => {
+                touchEndX = e.changedTouches[0].screenX;
+                handleSwipe();
+            }, false);
+
+            function handleSwipe() {
+                const diff = touchEndX - touchStartX;
+                if (Math.abs(diff) > swipeThreshold) {
+                    // 무한 순환: 현재 페이지가 무엇이든 반대 페이지로 전환 (페이지가 2개뿐이므로)
+                    const targetPage = currentPage === 'home' ? 'search' : 'home';
+                    
+                    // 스와이프 방향에 따른 애니메이션 처리를 위해 방향 정보 전달 (필요 시)
+                    window.showPage(targetPage);
+                }
+            }
 
             // 상단 플레이어 영역 클릭 시 시각화 모드 전환
             window.addEventListener('click', (e) => {
@@ -685,11 +709,19 @@
             const targetPage = document.getElementById(`page-${id}`);
             targetPage.style.display = 'flex';
             targetPage.classList.add('active');
+            currentPage = id;
 
-            // '검색' 페이지는 전체 스크롤, '홈'은 플레이어 고정
+            // UI 최적화: 목록 페이지에서는 플레이어 숨기기
+            const topHeader = document.getElementById('top-header-section');
+            const playerUI = document.getElementById('player-controls-ui');
+            
             if (id === 'search') {
+                playerUI.style.display = 'none';
+                topHeader.style.display = 'none'; // hide entire gradient on search
                 mainWrap.classList.add('main-scrollable');
             } else {
+                playerUI.style.display = 'flex';
+                topHeader.style.display = 'block';
                 mainWrap.classList.remove('main-scrollable');
             }
 
@@ -733,7 +765,7 @@
 
     <script>
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('sw.js?v=2.2.0').then(() => console.log('SW Registered'));
+            navigator.serviceWorker.register('sw.js?v=2.3.0').then(() => console.log('SW Registered'));
         }
     </script>
 </body>
